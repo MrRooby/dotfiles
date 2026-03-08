@@ -1,0 +1,23 @@
+
+{
+	"custom/fan": {
+		"interval": 1,
+		"format": " {}RPM",
+		// "format-icons":
+		"min-length": 7,
+		"max-length": 7,
+    "exec": "sensors | awk '/Fan 1:/ {val=$3} END {print (val ? val : '0')}'",
+		// "align":
+		// "justify":
+		// "rotate":
+		// "on-click":
+		// "on-click-middle":
+		// "on-click-right":
+		// "on-update":
+		// "on-scroll-up":
+		// "on-scroll-down":
+		// "smooth-scrolling-threshold":
+		"tooltip": false
+		// "expand":
+	}
+}

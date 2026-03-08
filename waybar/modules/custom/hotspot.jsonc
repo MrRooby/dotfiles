@@ -1,0 +1,10 @@
+{
+    "custom/hotspot": {
+        "format": "{}",
+        "return-type": "json",
+        "exec": "~/.config/waybar/scripts/hotspot.sh",
+        "on-click": "~/.config/waybar/scripts/hotspot.sh toggle",
+        "interval": 5,
+        "tooltip": true
+    }
+}
