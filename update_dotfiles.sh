@@ -1,12 +1,4 @@
 #!/usr/bin/env bash
-#
-# Dotfiles Manager — a gum-powered TUI
-#
-# Tracks folder pairs:  system path  ←→  repo subfolder
-# Pairs are stored in:  .tracked_folders  (same dir as this script)
-#
-# Usage: ./update_dotfiles.sh
-#
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TRACKS_FILE="$SCRIPT_DIR/.tracked_folders"
@@ -24,8 +16,8 @@ TRACK_REPO_REL=()   # relative repo path    (for grep/removal)
 title() {
     gum style \
         --border double \
-        --border-foreground 212 \
-        --foreground 212 \
+        --border-foreground 99 \
+        --foreground 99 \
         --bold \
         --align center \
         --width 56 \
@@ -36,8 +28,8 @@ title() {
 section() {
     gum style \
         --border rounded \
-        --border-foreground 99 \
-        --foreground 99 \
+        --border-foreground 166 \
+        --foreground 166 \
         --bold \
         --padding "0 1" \
         "$1"
@@ -46,11 +38,11 @@ section() {
 info()  { gum style --foreground 82  " ✓ $*"; }
 warn()  { gum style --foreground 214 " ⚠ $*"; }
 error() { gum style --foreground 196 " ✗ $*"; }
-step()  { gum style --foreground 75  " → $*"; }
+step()  { gum style --foreground 172 " → $*"; }
 
 pause() {
     echo ""
-    read -rsp $'\033[38;5;99m  Press ENTER to continue...\033[0m'
+    read -rsp $'\033[38;5;166m  Press ENTER to continue...\033[0m'
     echo ""
 }
 
@@ -151,40 +143,92 @@ action_diff() {
         pause; return
     fi
 
-    local selected
-    selected=$(gum choose --header "Select a folder pair to diff:" "${TRACK_LABELS[@]}") || return
-    [[ -z "$selected" ]] && return
+    # Build menu with "All folders" option at the top
+    local menu_items=("[All folders]" "${TRACK_LABELS[@]}")
 
-    local idx
-    idx=$(find_idx "$selected")
-    [[ "$idx" -lt 0 ]] && error "Could not resolve selection." && pause && return
+    local selections
+    selections=$(gum choose --no-limit \
+        --header "SPACE to select, ENTER to confirm — select folder(s) to diff:" \
+        "${menu_items[@]}") || return
+    [[ -z "$selections" ]] && return
 
-    local sys="${TRACK_SYS[$idx]}"
-    local repo="${TRACK_REPO[$idx]}"
-
-    echo ""
-    gum style --bold "Comparing:"
-    gum style --foreground 75  "  System : $sys"
-    gum style --foreground 212 "  Repo   : $repo"
-    echo ""
-
-    if [[ ! -e "$sys" ]]; then
-        error "System path not found: $sys"
-        pause; return
-    fi
-    if [[ ! -e "$repo" ]]; then
-        error "Repo path not found: $repo"
-        pause; return
+    # Check if "All folders" was selected
+    local diff_all=false
+    if echo "$selections" | grep -q "^\[All folders\]$"; then
+        diff_all=true
     fi
 
-    local diff_out
-    diff_out=$(diff -r --color=always "$sys" "$repo" 2>&1) || true
+    local combined_diff=""
+    local has_diff=false
 
-    if [[ -z "$diff_out" ]]; then
-        info "No differences — paths are in sync."
+    if [[ "$diff_all" == true ]]; then
+        # Diff all tracked folders
+        for i in "${!TRACK_LABELS[@]}"; do
+            local sys="${TRACK_SYS[$i]}"
+            local repo="${TRACK_REPO[$i]}"
+            local label="${TRACK_LABELS[$i]}"
+
+            if [[ ! -e "$sys" ]]; then
+                combined_diff+=$'\n'"$(gum style --foreground 196 "✗ System path not found: $sys")"$'\n'
+                continue
+            fi
+            if [[ ! -e "$repo" ]]; then
+                combined_diff+=$'\n'"$(gum style --foreground 196 "✗ Repo path not found: $repo")"$'\n'
+                continue
+            fi
+
+            local diff_out
+            diff_out=$(diff -r --color=always "$sys" "$repo" 2>&1) || true
+
+            if [[ -n "$diff_out" ]]; then
+                has_diff=true
+                combined_diff+=$'\n'"$(gum style --bold --foreground 99 "━━━ $label ━━━")"$'\n'
+                combined_diff+="$diff_out"$'\n'
+            fi
+        done
+    else
+        # Diff selected folders
+        while IFS= read -r selected; do
+            [[ -z "$selected" ]] && continue
+            [[ "$selected" == "[All folders]" ]] && continue
+
+            local idx
+            idx=$(find_idx "$selected")
+            [[ "$idx" -lt 0 ]] && continue
+
+            local sys="${TRACK_SYS[$idx]}"
+            local repo="${TRACK_REPO[$idx]}"
+
+            if [[ ! -e "$sys" ]]; then
+                combined_diff+=$'\n'"$(gum style --foreground 196 "✗ System path not found: $sys")"$'\n'
+                continue
+            fi
+            if [[ ! -e "$repo" ]]; then
+                combined_diff+=$'\n'"$(gum style --foreground 196 "✗ Repo path not found: $repo")"$'\n'
+                continue
+            fi
+
+            local diff_out
+            diff_out=$(diff -r --color=always "$sys" "$repo" 2>&1) || true
+
+            if [[ -n "$diff_out" ]]; then
+                has_diff=true
+                combined_diff+=$'\n'"$(gum style --bold --foreground 99 "━━━ $selected ━━━")"$'\n'
+                combined_diff+="$diff_out"$'\n'
+            fi
+        done <<< "$selections"
+    fi
+
+    echo ""
+    if [[ "$has_diff" == false && -z "$combined_diff" ]]; then
+        info "No differences — all selected paths are in sync."
+        pause
+    elif [[ "$has_diff" == false ]]; then
+        echo "$combined_diff"
+        info "No differences — all selected paths are in sync."
         pause
     else
-        echo "$diff_out" | gum pager
+        echo "$combined_diff" | gum pager
     fi
 }
 
@@ -315,19 +359,20 @@ action_manage() {
 
         local choice
         choice=$(gum choose \
-            "➕  Add folder pair" \
-            "➖  Remove folder pair" \
-            "📋  List tracked folders" \
-            "← Back") || return
+            "Add folder pair" \
+            "Remove folder pair" \
+            "List tracked folders" \
+            "Back") || return
 
         echo ""
         case "$choice" in
 
-            "➕  Add folder pair")
+            "Add folder pair")
                 # ── Pick system path via file browser ──────────────────────
-                gum style --foreground 75 "  Navigate to the system folder and press ENTER to select:"
+                gum style --foreground 172 "  Select a config folder from ~/.config:"
                 local sys_path
-                sys_path=$(gum file --all --directory "$HOME") || continue
+                sys_path=$(find "$HOME/.config" -maxdepth 1 -mindepth 1 -type d | sort | \
+                    gum filter --placeholder "Type to filter..." --height 20) || continue
                 [[ -z "$sys_path" ]] && warn "Cancelled." && continue
 
                 # Shrink $HOME → ~ for storage
@@ -336,12 +381,12 @@ action_manage() {
                 # ── Pick repo subfolder ────────────────────────────────────
                 local repo_pick
                 repo_pick=$(gum choose \
-                    "📂  Browse repo for existing folder" \
-                    "✏️  Type a new subfolder name") || continue
+                    "Browse repo for existing folder" \
+                    "Type a new subfolder name") || continue
 
                 local repo_rel
-                if [[ "$repo_pick" == "📂  Browse repo for existing folder" ]]; then
-                    gum style --foreground 75 "  Navigate to the repo subfolder and press ENTER:"
+                if [[ "$repo_pick" == "Browse repo for existing folder" ]]; then
+                    gum style --foreground 172 "  Navigate to the repo subfolder and press ENTER:"
                     local repo_path
                     repo_path=$(gum file --all --directory "$SCRIPT_DIR") || continue
                     [[ -z "$repo_path" ]] && warn "Cancelled." && continue
@@ -363,7 +408,7 @@ action_manage() {
                 pause
                 ;;
 
-            "➖  Remove folder pair")
+            "Remove folder pair")
                 load_tracks
                 if [[ ${#TRACK_LABELS[@]} -eq 0 ]]; then
                     warn "Nothing to remove."
@@ -392,7 +437,7 @@ action_manage() {
                 pause
                 ;;
 
-            "📋  List tracked folders")
+            "List tracked folders")
                 load_tracks
                 echo ""
                 if [[ ${#TRACK_LABELS[@]} -eq 0 ]]; then
@@ -400,14 +445,14 @@ action_manage() {
                 else
                     local i=1
                     for label in "${TRACK_LABELS[@]}"; do
-                        gum style --foreground 75 "  $i.  $label"
+                        gum style --foreground 172 "  $i.  $label"
                         i=$((i + 1))
                     done
                 fi
                 pause
                 ;;
 
-            "← Back" | "")
+            "Back" | "")
                 return
                 ;;
         esac
@@ -427,24 +472,24 @@ main() {
 
         local choice
         choice=$(gum choose \
-            "🔍  View Diff" \
-            "⬆   Push to Repo    (System → Repo)" \
-            "⬇   Update from Repo  (Repo → System)" \
-            "📁  Manage Tracked Folders" \
-            "❌  Quit") || break
+            "View Diff" \
+            "Push to Repo    (System -> Repo)" \
+            "Update from Repo  (Repo -> System)" \
+            "Manage Tracked Folders" \
+            "Quit") || break
 
         echo ""
         case "$choice" in
-            "🔍  View Diff")                        action_diff   ;;
-            "⬆   Push to Repo    (System → Repo)")  action_push   ;;
-            "⬇   Update from Repo  (Repo → System)") action_update ;;
-            "📁  Manage Tracked Folders")            action_manage ;;
-            "❌  Quit" | "")                         break         ;;
+            "View Diff")                           action_diff   ;;
+            "Push to Repo    (System -> Repo)")    action_push   ;;
+            "Update from Repo  (Repo -> System)")  action_update ;;
+            "Manage Tracked Folders")              action_manage ;;
+            "Quit" | "")                           break         ;;
         esac
     done
 
     echo ""
-    gum style --foreground 212 --bold "Goodbye! 👋"
+    gum style --foreground 99 --bold "Goodbye!"
     echo ""
 }
 

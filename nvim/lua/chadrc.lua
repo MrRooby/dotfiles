@@ -9,18 +9,12 @@ M.base46 = {
 	theme = "gruvbox",
 
 	hl_override = {
-		Comment = { italic = true },
-		["@comment"] = { italic = true },
+		Comment = { fg = "#B0B0B0", italic = true,},
+		["@comment"] = { fg = "#B0B0B0", italic = true },
 	},
 
   transparency = true
 }
 
--- M.nvdash = { load_on_startup = true }
--- M.ui = {
---       tabufline = {
---          lazyload = false
---      }
--- }
 
 return M
