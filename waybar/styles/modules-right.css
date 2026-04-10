@@ -40,7 +40,8 @@
 	background-color: @backlight;
 	color: @battery;
 }
-#battery {
+#custom-keyboard{
+	padding: 0 10px 0 5px;
 	background-color: @battery;
 	color: @dirty-orange;
 }
@@ -56,13 +57,9 @@
   background-color: @battery;
   color: @dirty-orange;
 }
-#custom-power_menu {
+#battery{
 	/* border-radius: 16px; */
-	padding: 0 19px 0 16px;
+	/* padding: 0 19px 0 16px; */
 	color: @main-bg;
-  background-color: @dirty-orange;
-}
-#custom-power_menu:hover {
-	color: @accent;
   background-color: @dirty-orange;
 }

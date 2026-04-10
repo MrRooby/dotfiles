@@ -1,0 +1,9 @@
+{
+  "custom/keyboard": {
+    "format": "{}",
+    "return-type": "json",
+    "exec": "~/.config/waybar/scripts/corne.sh",
+    "interval": 60, // Updates every minute to save power
+    "on-click": "XDG_CURRENT_DESKTOP=GNOME gnome-control-center power"
+  }
+}
