@@ -1,4 +1,11 @@
+vim.filetype.add {
+  extension = {
+    h = "c",
+  },
+}
+
 return {
+  -- ... reszta twoich pluginówurn {
   {
     "stevearc/conform.nvim",
     -- event = 'BufWritePre', -- uncomment for format on save
@@ -25,12 +32,14 @@ return {
 
   {
     "nvim-treesitter/nvim-treesitter",
+    version = "*", -- Forces Lazy to use stable tagged releases compatible with older Neovim
     opts = function(_, opts)
       opts.ensure_installed = opts.ensure_installed or {}
       vim.list_extend(opts.ensure_installed, {
         "html", "css", "c", "cpp", "python", "c_sharp"
       })
       opts.highlight = { enable = true }
+      return opts
     end,
   },
 
