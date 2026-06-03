@@ -1,82 +1,85 @@
 {
-	"include": [
-		"~/.config/waybar/modules/*.jsonc",
-		"~/.config/waybar/modules/custom/*.jsonc",
-		"~/.config/waybar/modules/hyprland/*.jsonc"
+    "include": [
+        "~/.config/waybar/modules/*.jsonc",
+        "~/.config/waybar/modules/custom/*.jsonc",
+        "~/.config/waybar/modules/sway/*.jsonc"
 
-		// modules that are not included by default:
-		// "~/.config/waybar/modules/extras/*.jsonc"
-	],
+        // modules that are not included by default:
+        // "~/.config/waybar/modules/extras/*.jsonc"
+    ],
 
-	/*------------
-	    layout
-	------------*/
+    // Bypasses the asynchronous D-Bus portal theme check to eliminate the 60s startup hang
+    "locale": "",
 
-	"modules-left": [
-		"custom/left_div#1",
-		"hyprland/workspaces",
-		"custom/right_div#1"
-	],
-	"modules-center": [
-		"custom/left_div#2",
-    "custom/fan",
-		"custom/left_div#3",
-		"temperature",
-		"custom/left_div#4",
-		"cpu",
-		"custom/left_div#5",
-		"clock#time",
-		"custom/right_div#2",
-		"clock#date",
-		"custom/right_div#3",
-		"memory",
-		"custom/right_div#4",
-		"network",
-		"bluetooth",
-		"custom/hotspot",
-		"custom/right_div#5"
-	],
-	"modules-right": [
-		"mpris",
-		"custom/left_div#6",
-		"group/pulseaudio",
-		"custom/left_div#7",
-		"backlight",
-		"custom/left_div#8",
-		"custom/keyboard",
-    "custom/left_div#9",
-		"battery"
-	],
+    /*------------
+        layout
+    ------------*/
 
-	/*-------------
-	    options
-	-------------*/
+    "modules-left": [
+        "custom/left_div#1",
+        "sway/workspaces",
+        "custom/right_div#1"
+    ],
+    "modules-center": [
+        "custom/left_div#2",
+        "custom/fan",
+        "custom/left_div#3",
+        "temperature",
+        "custom/left_div#4",
+        "cpu",
+        "custom/left_div#5",
+        "clock#time",
+        "custom/right_div#2",
+        "clock#date",
+        "custom/right_div#3",
+        "memory",
+        "custom/right_div#4",
+        "network",
+        "bluetooth",
+        "custom/hotspot",
+        "custom/right_div#5"
+    ],
+    "modules-right": [
+        "mpris",
+        "custom/left_div#6",
+        "group/pulseaudio",
+        "custom/left_div#7",
+        "backlight",
+        "custom/left_div#8",
+        "custom/keyboard",
+        "custom/left_div#9",
+        "battery"
+    ],
 
-	// "expand-center":
-	// "expand-left":
-	// "expand-right":
-	"layer": "top",
-	// "output":
-	// "position":
-	"height": 0,
-	"width": 0,
-	"margin": 0,
-	// "margin-top":
-	// "margin-left":
-	// "margin-bottom":
-	// "margin-right":
-	// "no-center":
-	"spacing": 0,
-	// "name":
-	"mode": "dock",
-	// "start_hidden":
-	// "modifier-reset":
-	// "exclusive":
-	// "fixed-center":
-	// "passthrough":
-	// "ipc":
-	// "id":
-	"reload_style_on_change": true
-	// "on-sigusr1":
-	// "on-sigusr2":
+    /*-------------
+        options
+    -------------*/
+
+    // "expand-center":
+    // "expand-left":
+    // "expand-right":
+    "layer": "top",
+    // "output":
+    "position": "top",
+    "height": "auto",
+    "width": "auto",
+    "margin": 0,
+    "exclusive": true, 
+    // "margin-top":
+    // "margin-left":
+    // "margin-bottom":
+    // "margin-right":
+    // "no-center":
+    "spacing": 0,
+    // "name":
+    "mode": "dock",
+    // "start_hidden":
+    // "modifier-reset":
+    // "fixed-center":
+    // "passthrough":
+    // "ipc":
+    // "id":
+    "reload_style_on_change": true
+    // "on-sigusr1":
+    // "on-sigusr2":
 }
