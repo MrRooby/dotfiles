@@ -113,6 +113,27 @@ find_idx() {
     return 1
 }
 
+# ─── Selection helper ──────────────────────────────────────────────────────────
+
+# Given a gum selection string (which may include "[All folders]"), echo the
+# matching track indices, one per line.
+resolve_selection_indices() {
+    local selections="$1"
+    if echo "$selections" | grep -qxF "[All folders]"; then
+        local i
+        for i in "${!TRACK_LABELS[@]}"; do echo "$i"; done
+        return
+    fi
+    while IFS= read -r selected; do
+        [[ -z "$selected" ]] && continue
+        [[ "$selected" == "[All folders]" ]] && continue
+        local idx
+        idx=$(find_idx "$selected")
+        [[ "$idx" -lt 0 ]] && continue
+        echo "$idx"
+    done <<< "$selections"
+}
+
 # ─── Backup ────────────────────────────────────────────────────────────────────
 
 do_backup() {
@@ -244,10 +265,11 @@ action_push() {
         pause; return
     fi
 
+    local menu_items=("[All folders]" "${TRACK_LABELS[@]}")
     local selections
     selections=$(gum choose --no-limit \
         --header "SPACE to select, ENTER to confirm — push system → repo:" \
-        "${TRACK_LABELS[@]}") || return
+        "${menu_items[@]}") || return
     [[ -z "$selections" ]] && return
 
     local backup=no
@@ -257,11 +279,8 @@ action_push() {
     echo ""
     local ok=0 fail=0
 
-    while IFS= read -r selected; do
-        [[ -z "$selected" ]] && continue
-        local idx
-        idx=$(find_idx "$selected")
-        [[ "$idx" -lt 0 ]] && continue
+    while IFS= read -r idx; do
+        [[ -z "$idx" ]] && continue
 
         local sys="${TRACK_SYS[$idx]}"
         local repo="${TRACK_REPO[$idx]}"
@@ -274,16 +293,21 @@ action_push() {
 
         [[ "$backup" == yes ]] && [[ -e "$repo" ]] && do_backup "$repo"
 
-        mkdir -p "$repo"
+        local src dst rsync_extra
+        if [[ -d "$sys" ]]; then
+            mkdir -p "$repo"; src="$sys/"; dst="$repo/"; rsync_extra="--delete"
+        else
+            mkdir -p "$(dirname "$repo")"; src="$sys"; dst="$repo"; rsync_extra=""
+        fi
         if gum spin --spinner dot --title " Pushing $(basename "$sys")..." -- \
-                rsync -a --delete "$sys/" "$repo/"; then
+                rsync -a $rsync_extra "$src" "$dst"; then
             info "Pushed: $sys → $repo"
             ok=$((ok + 1))
         else
             error "Failed: $sys → $repo"
             fail=$((fail + 1))
         fi
-    done <<< "$selections"
+    done <<< "$(resolve_selection_indices "$selections")"
 
     echo ""
     info "Done — $ok pushed, $fail failed."
@@ -302,10 +326,11 @@ action_update() {
         pause; return
     fi
 
+    local menu_items=("[All folders]" "${TRACK_LABELS[@]}")
     local selections
     selections=$(gum choose --no-limit \
         --header "SPACE to select, ENTER to confirm — update repo → system:" \
-        "${TRACK_LABELS[@]}") || return
+        "${menu_items[@]}") || return
     [[ -z "$selections" ]] && return
 
     local backup=no
@@ -315,11 +340,8 @@ action_update() {
     echo ""
     local ok=0 fail=0
 
-    while IFS= read -r selected; do
-        [[ -z "$selected" ]] && continue
-        local idx
-        idx=$(find_idx "$selected")
-        [[ "$idx" -lt 0 ]] && continue
+    while IFS= read -r idx; do
+        [[ -z "$idx" ]] && continue
 
         local sys="${TRACK_SYS[$idx]}"
         local repo="${TRACK_REPO[$idx]}"
@@ -332,16 +354,21 @@ action_update() {
 
         [[ "$backup" == yes ]] && [[ -e "$sys" ]] && do_backup "$sys"
 
-        mkdir -p "$sys"
+        local src dst rsync_extra
+        if [[ -d "$repo" ]]; then
+            mkdir -p "$sys"; src="$repo/"; dst="$sys/"; rsync_extra="--delete"
+        else
+            mkdir -p "$(dirname "$sys")"; src="$repo"; dst="$sys"; rsync_extra=""
+        fi
         if gum spin --spinner dot --title " Updating $(basename "$sys")..." -- \
-                rsync -a --delete "$repo/" "$sys/"; then
+                rsync -a $rsync_extra "$src" "$dst"; then
             info "Updated: $repo → $sys"
             ok=$((ok + 1))
         else
             error "Failed: $repo → $sys"
             fail=$((fail + 1))
         fi
-    done <<< "$selections"
+    done <<< "$(resolve_selection_indices "$selections")"
 
     echo ""
     info "Done — $ok updated, $fail failed."
@@ -368,21 +395,52 @@ action_manage() {
         case "$choice" in
 
             "Add folder pair")
-                # ── Pick system path via file browser ──────────────────────
-                gum style --foreground 172 "  Select a config folder from ~/.config:"
+                # ── Choose how to pick the system path ─────────────────────
+                local src_method
+                src_method=$(gum choose \
+                    "Pick a folder from ~/.config" \
+                    "Browse files/folders from home (~)" \
+                    "Type a path manually (file or folder)") || continue
+
                 local sys_path
-                sys_path=$(find "$HOME/.config" -maxdepth 1 -mindepth 1 -type d | sort | \
-                    gum filter --placeholder "Type to filter..." --height 20) || continue
+                case "$src_method" in
+                    "Pick a folder from ~/.config")
+                        gum style --foreground 172 "  Select a config folder from ~/.config:"
+                        sys_path=$(find "$HOME/.config" -maxdepth 1 -mindepth 1 -type d | sort | \
+                            gum filter --placeholder "Type to filter..." --height 20) || continue
+                        ;;
+                    "Browse files/folders from home (~)")
+                        gum style --foreground 172 "  Navigate and select a file or folder (a to toggle hidden):"
+                        sys_path=$(gum file --all "$HOME") || continue
+                        ;;
+                    "Type a path manually (file or folder)")
+                        sys_path=$(gum input \
+                            --placeholder "~/.zshrc" \
+                            --prompt "Path (file or folder) › ") || continue
+                        # Expand a leading ~ to $HOME
+                        sys_path="${sys_path/#\~/$HOME}"
+                        ;;
+                    *) continue ;;
+                esac
+
                 [[ -z "$sys_path" ]] && warn "Cancelled." && continue
+                if [[ ! -e "$sys_path" ]]; then
+                    error "Path does not exist: $sys_path"
+                    pause; continue
+                fi
 
                 # Shrink $HOME → ~ for storage
                 local sys_raw="${sys_path/#$HOME/\~}"
 
-                # ── Pick repo subfolder ────────────────────────────────────
+                # ── Pick repo destination (folder or file path) ────────────
+                local default_rel
+                default_rel="$(basename "$sys_path")"
+                default_rel="${default_rel#.}"   # drop leading dot for nicer repo names
+
                 local repo_pick
                 repo_pick=$(gum choose \
                     "Browse repo for existing folder" \
-                    "Type a new subfolder name") || continue
+                    "Type a destination path in the repo") || continue
 
                 local repo_rel
                 if [[ "$repo_pick" == "Browse repo for existing folder" ]]; then
@@ -391,10 +449,13 @@ action_manage() {
                     repo_path=$(gum file --all --directory "$SCRIPT_DIR") || continue
                     [[ -z "$repo_path" ]] && warn "Cancelled." && continue
                     repo_rel="${repo_path#$SCRIPT_DIR/}"
+                    # If tracking a file, append its name to the chosen folder
+                    [[ -f "$sys_path" ]] && repo_rel="$repo_rel/$(basename "$sys_path")"
                 else
                     repo_rel=$(gum input \
-                        --placeholder "hypr" \
-                        --prompt "Repo subfolder name › ") || continue
+                        --placeholder "zsh/.zshrc  (file)   or   hypr  (folder)" \
+                        --value "$default_rel" \
+                        --prompt "Repo destination path › ") || continue
                 fi
                 [[ -z "$repo_rel" ]] && warn "Cancelled." && continue
 
