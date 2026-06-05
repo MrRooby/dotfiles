@@ -1,7 +1,7 @@
 show=drun
 term=kitty
 show_all=true
-gtk_dark=false
+gtk_dark=true
 location=center
 insensitive=true
 allow_markup=true
@@ -10,5 +10,5 @@ line_wrap=word
 lines=8
 width=500
 no_actions=true
-prompt= Czego...
+prompt=Czego...
 hide_scroll=true

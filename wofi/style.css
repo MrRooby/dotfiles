@@ -1,72 +1,78 @@
+@define-color dirty-orange #CE6B29;
+@define-color dirty-background #232634;
+
 * {
-  font-family: Maple Mono;
+  font-family: "Maple Mono", monospace;
   background: transparent;
   color: #d8cab8;
 }
 
 #window {
   color: #d8cab8;
-  border-color: #d8cab8;
+  border-color: @dirty-orange;
   border-style: solid;
-  border-width: 1px;
+  border-width: 2px;
 
-  /*Linear gradient background instead of standard background, because it makes cleaner border-radius cuts, issa bug :p*/
-  background-image: linear-gradient(to bottom, #141216 100%);
-  border-radius: 14px;
-}
-#scroll {
-  border-top-style: solid;
-  border-width: 1px;
-  border-color: #d8cab8;
-}
-#inner-box {
-  padding-top: 12px;
-}
-#entry {
-  border-style: none;
-  border-color: #d8cab8;
-  color: #d8cab8;
-  padding: 6px;
-  margin-bottom: 8px;
-  margin-left: 12px;
-  margin-right: 12;
-
-  border-radius: 12px;
+  background-image: linear-gradient(to bottom, @dirty-background 100%);
+  border-radius: 0px;
 }
 
-#entry:selected {
-  background: #27232b;
-  color: #d8cab8;
-  font-weight: bold;
-  outline: none;
+#outer-box {
+  padding: 10px;
 }
 
 #input {
-  background-color: #141216;
+  background-color: @dirty-background;
   color: #d8cab8;
-  border-color: #d8cab8;
+  border-color: #9b9b9b;
 
   border-style: none;
   border-bottom-style: solid;
   border-width: 1px;
 
   font-style: normal;
-
-  border-radius: 8;
-  border-bottom-left-radius: 0px;
-  border-bottom-right-radius: 0px;
+  border-radius: 0px;
 
   padding: 12px;
   margin: 8px;
 }
+
 #input:focus {
-  background: #27232b;
-  background-color: #27232b;
-  border-color: #ac82e9;
+  background-color: #303446;
+  border-color: @dirty-orange;
   font-style: italic;
+  outline: none;
+}
+
+#scroll {
+  border-style: none;
+  margin: 4px;
+}
+
+#inner-box {
+  padding-top: 4px;
+}
+
+#entry {
+  border-style: none;
+  color: #d8cab8;
+  padding: 8px;
+  margin: 2px 8px;
+  border-radius: 0px;
+}
+
+#entry:selected {
+  background-color: @dirty-orange;
+  color: @dirty-background;
+  font-weight: bold;
+  outline: none;
+}
+
+#text {
+  margin: 2px;
 }
 
 #img {
   padding: 4px;
-  margin-right: 6px;
+  margin-right: 8px;
 }
