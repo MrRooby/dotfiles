@@ -131,8 +131,8 @@ for_window [app_id="qalculate-gtk"]          floating enable, move position cent
 for_window [app_id="nemo"]                   floating enable, move position center, resize set 800 600
 for_window [app_id="xdg-desktop-portal-gtk"] floating enable, move position center, resize set 800 600
 for_window [app_id="org.gnome.FileRoller"]   floating enable, move position center, resize set 700 500
-for_window [class="bluetui-popup"]           floating enable, border pixel 2, resize set 700 450, move absolute position 610 40
-for_window [class="impala-popup"]            floating enable, border pixel 2, resize set 700 450, move absolute position 610 40
+for_window [class="bluetui-popup"]           floating enable, border pixel 2, resize set 700 700, move absolute position 610 30
+for_window [class="impala-popup"]            floating enable, border pixel 2, resize set 700 700, move absolute position 610 30
 
 # Unity popups minimum boundaries rules
 for_window [class="Unity" title="Project Settings"] floating enable, resize set 250 250
