@@ -18,6 +18,8 @@ exec --no-startup-id sh -c 'eval $(gnome-keyring-daemon --login) eval $(gnome-ke
 exec nm-applet
 exec waybar
 
+exec_always hypridle
+
 # Set retro-cursor parameters
 exec_always swaymsg seat seat0 xcursor_theme retro-cursor 24
 
