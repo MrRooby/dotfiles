@@ -41,7 +41,7 @@
 	background-color: @memory;
 	color: @cpu;
 }
-#cpu {
+#custom-cpu {
 	background-color: @cpu;
   color: @dirty-orange;
 }
@@ -131,4 +131,16 @@
 }
 #custom-right_div.5 {
 	color: @tray;
+}
+
+/*---------------------------------
+    centring pad for clock#time
+---------------------------------*/
+
+/* fixed-center keeps the whole centre block centred, so clock#time only
+   lands on the screen centre if the block is symmetrical around it. this
+   pad makes up the difference; it is transparent and sits before the first
+   divider, so nothing is visible. */
+#custom-center_pad {
+	min-width: 25px;
 }

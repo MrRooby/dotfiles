@@ -27,11 +27,4 @@ button:hover {
 	color: @hover-fg;
 }
 
-tooltip {
-	border: 2px solid @main-br;
-	border-radius: 10px;
-	background-color: @main-bg;
-}
-tooltip > box {
-	padding: 0 6px;
-}
+/* tooltips live in styles/tooltips.css */

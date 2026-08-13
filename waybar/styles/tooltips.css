@@ -1,0 +1,41 @@
+/*==============
+    tooltips
+==============*/
+
+/* same language as wofi #window:
+   flat @dirty-background, square corners, 2px dirty-orange frame */
+
+tooltip {
+	background-color: @tooltip-bg;
+	border: 2px solid @tooltip-br;
+	border-radius: 0px;
+	padding: 0px;
+	margin: 0px;
+}
+
+tooltip > box {
+	padding: 6px 10px;
+}
+
+tooltip label {
+	color: @tooltip-fg;
+	font-weight: normal;
+	font-size: 13px;
+	padding: 0px;
+	margin: 0px;
+}
+
+/*----------------------
+    calendar tooltip
+----------------------*/
+
+/* month header + today marker pick up the accent,
+   the grid stays on the warm foreground */
+
+#clock.date tooltip > box {
+	padding: 8px 12px;
+}
+
+#clock.date tooltip label {
+	font-size: 13px;
+}

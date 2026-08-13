@@ -1,0 +1,58 @@
+{
+	/*--------------------------------------------
+	    battery level + power profile switcher
+	--------------------------------------------*/
+
+	// hovering the battery percentage slides out the three profile buttons.
+	// this lives in modules-right, which is anchored to the right edge, so
+	// the block can only grow leftwards — the centre island never moves.
+	//
+	// left_div#10 is the powerline wedge that carries the island from the
+	// orange battery back onto the dark button field; it has to be the
+	// first revealed child so the seam stays correct while open.
+	"group/battery_profile": {
+		"orientation": "horizontal",
+		"modules": [
+			"battery",
+			"custom/left_div#10",
+			"custom/pp_performance",
+			"custom/pp_balanced",
+			"custom/pp_saver"
+		],
+		"drawer": {
+			"transition-duration": 300,
+			"transition-left-to-right": true,
+			"children-class": "pp-item"
+		}
+	},
+
+	"custom/pp_performance": {
+		"exec": "~/.config/waybar/scripts/power-profile.sh get performance",
+		"return-type": "json",
+		"interval": 10,
+		"signal": 7,
+		"on-click": "~/.config/waybar/scripts/power-profile.sh set performance",
+		"min-length": 3,
+		"max-length": 3
+	},
+
+	"custom/pp_balanced": {
+		"exec": "~/.config/waybar/scripts/power-profile.sh get balanced",
+		"return-type": "json",
+		"interval": 10,
+		"signal": 7,
+		"on-click": "~/.config/waybar/scripts/power-profile.sh set balanced",
+		"min-length": 3,
+		"max-length": 3
+	},
+
+	"custom/pp_saver": {
+		"exec": "~/.config/waybar/scripts/power-profile.sh get power-saver",
+		"return-type": "json",
+		"interval": 10,
+		"signal": 7,
+		"on-click": "~/.config/waybar/scripts/power-profile.sh set power-saver",
+		"min-length": 3,
+		"max-length": 3
+	}
+}

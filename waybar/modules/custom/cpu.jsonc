@@ -1,0 +1,15 @@
+{
+	/*----------------------------------------
+	    cpu usage, per-thread tooltip
+	----------------------------------------*/
+
+	// replaces the built-in "cpu" module: that one accepts only
+	// tooltip on/off, and never reports per-thread clocks
+	"custom/cpu": {
+		"exec": "~/.config/waybar/scripts/cpu.sh",
+		"return-type": "json",
+		"interval": 1,
+		"min-length": 6,
+		"max-length": 6
+	}
+}

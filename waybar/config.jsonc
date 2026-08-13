@@ -22,12 +22,13 @@
         "sway/window"
     ],
     "modules-center": [
+        "custom/center_pad",
         "custom/left_div#2",
         "custom/fan",
         "custom/left_div#3",
         "temperature",
         "custom/left_div#4",
-        "cpu",
+        "custom/cpu",
         "custom/left_div#5",
         "clock#time",
         "custom/right_div#2",
@@ -50,7 +51,7 @@
         "custom/left_div#8",
         "custom/keyboard",
         "custom/left_div#9",
-        "battery"
+        "group/battery_profile"
     ],
 
     /*-------------

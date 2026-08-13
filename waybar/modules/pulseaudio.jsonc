@@ -1,16 +1,12 @@
 {
+	// no "drawer" here on purpose: output *and* microphone stay
+	// permanently visible instead of the mic hiding behind a hover
 	"group/pulseaudio": {
 		"orientation": "horizontal",
 		"modules": [
 			"pulseaudio#output",
 			"pulseaudio#input"
-		],
-		"drawer": {
-			// "transition-duration":
-			"transition-left-to-right": false
-			// "children-class":
-			// "click-to-reveal":
-		}
+		]
 	},
 
 	/*-------------------

@@ -20,14 +20,14 @@
 }
 
 #memory.warning,
-#cpu.warning,
+#custom-cpu.warning,
 #battery.warning {
 	color: @warning;
 }
 
 #temperature.critical,
 #memory.critical,
-#cpu.critical,
+#custom-cpu.critical,
 #battery.critical {
 	color: @critical;
 }

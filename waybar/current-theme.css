@@ -28,7 +28,15 @@
 @define-color crust         #11111b;
 
 @define-color dirty-orange #CE6B29;
-@define-color dirty-background #003D5B;
+
+/* shared with wofi/style.css and sway/config — keep in sync */
+@define-color dirty-background #232634;
+@define-color dirty-fg #d8cab8;
+@define-color dirty-dim #9b9b9b;
+
+/* same warmth/saturation family as dirty-orange */
+@define-color dirty-red #C4402B;
+@define-color dirty-green #5F9E4A;
 
 /*
 	br - border
@@ -58,6 +66,19 @@
 @define-color volume        @mantle;
 @define-color backlight     @base;
 @define-color battery       @surface0;
+
+/* power profile colors */
+
+@define-color pp-performance @dirty-red;
+@define-color pp-balanced    @dirty-orange;
+@define-color pp-saver       @dirty-green;
+
+/* tooltip colors */
+
+@define-color tooltip-bg    @dirty-background;
+@define-color tooltip-br    @dirty-orange;
+@define-color tooltip-fg    @dirty-fg;
+@define-color tooltip-dim   @dirty-dim;
 
 /* state colors */
 

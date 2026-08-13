@@ -7,6 +7,15 @@
 		"format": " ",
 		"tooltip": false
 	},
+	// invisible pad on the right end of modules-center. "fixed-center"
+	// centres the whole block, not the clock, so the block has to be made
+	// symmetrical around clock#time by hand. width lives in
+	// styles/modules-center.css -- retune it if a centre module changes size.
+	// a space, not "": waybar hides a module whose output is empty
+	"custom/center_pad": {
+		"format": " ",
+		"tooltip": false
+	},
 	"custom/left_div#1": {
 		"format": "",
 		"tooltip": false
@@ -40,6 +49,11 @@
 		"tooltip": false
 	},
 	"custom/left_div#9": {
+		"format": "",
+		"tooltip": false
+	},
+	// revealed inside the battery power-profile drawer
+	"custom/left_div#10": {
 		"format": "",
 		"tooltip": false
 	},

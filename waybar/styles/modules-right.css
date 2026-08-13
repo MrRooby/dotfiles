@@ -63,3 +63,52 @@
 	color: @main-bg;
   background-color: @dirty-orange;
 }
+
+/*-------------------
+    power profile
+-------------------*/
+
+/* drawer hanging off the battery module. the wedge carries the island
+   back from the orange battery onto the dark button field */
+#custom-left_div.10 {
+	background-color: @dirty-orange;
+	color: @battery;
+}
+
+#battery_profile,
+#custom-pp_performance,
+#custom-pp_balanced,
+#custom-pp_saver {
+	background-color: @battery;
+}
+
+#custom-pp_performance,
+#custom-pp_balanced,
+#custom-pp_saver {
+	padding: 0 7px;
+	font-size: 15px;
+}
+
+#custom-pp_performance {
+	color: @pp-performance;
+}
+#custom-pp_balanced {
+	color: @pp-balanced;
+}
+#custom-pp_saver {
+	color: @pp-saver;
+}
+
+/* active profile is inverted, same treatment as #entry:selected in wofi */
+#custom-pp_performance.active {
+	background-color: @pp-performance;
+	color: @tooltip-bg;
+}
+#custom-pp_balanced.active {
+	background-color: @pp-balanced;
+	color: @tooltip-bg;
+}
+#custom-pp_saver.active {
+	background-color: @pp-saver;
+	color: @tooltip-bg;
+}

@@ -1,4 +1,6 @@
 {
+	// superseded by custom/cpu (see modules/custom/cpu.jsonc), which adds
+	// the per-thread usage + clock tooltip. kept here for reference.
 	"cpu": {
 		"interval": 1,
 		"format": "󰍛 {usage}%",
