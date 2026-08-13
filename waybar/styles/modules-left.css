@@ -29,6 +29,7 @@
 ------------------*/
 
 #window {
-  color: @dirty-background;
+  /* same treatment as #mpris: plain text floating on the bar */
+  color: @main-fg;
 	margin-left: 12px;
 }

@@ -6,10 +6,8 @@ set $fileManager nemo
 
 # ------------- Monitors
 # Maps directly to your Hyprland preffered positions and sunshine headless profile
-output eDP-1 pos 0 0 res 1920x1080
-output HDMI-A-1 pos 1920 0 res 1920x1080
 
-workspace 1 monitor eDP-1
+# workspace 1 monitor eDP-1
 
 # ------------- Autostart
 # Fixed order to prevent D-Bus and portal timeouts
@@ -17,6 +15,11 @@ exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DE
 exec --no-startup-id sh -c 'eval $(gnome-keyring-daemon --login) eval $(gnome-keyring-daemon --start --components=secrets,ssh) export SSH_AUTH_SOCK'
 exec nm-applet
 exec waybar
+
+exec /usr/libexec/lxqt-policykit-agent
+exec systemctl --user import-environment QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME
+set $env QT_QPA_PLATFORM wayland
+set $env QT_QPA_PLATFORMTHEME qt6ct
 
 # Screen timeout lock and turn off display
 exec hypridle
@@ -109,18 +112,67 @@ bindsym $mainMod+Shift+9 move container to workspace number 9
 bindsym $mainMod+Shift+0 move container to workspace number 10
 
 # ------------- Input Configuration
+# Set the keyboard layout globally for all input devices
 input * {
     xkb_layout "pl"
+}
+
+# Target touchpads specifically to keep natural scrolling active
+input "type:touchpad" {
+    natural_scroll enabled
+    dwt enabled
+    tap enabled
+}
+
+# Target physical mice specifically to turn natural scrolling off (unflipping the wheel)
+input "type:pointer" {
     natural_scroll disabled
 }
 
+# input "1267:12678:MSFT0001:00_04F3:3186_Touchpad" {
+#     # Enable tap-to-click
+#     tap enabled
+#
+#     # Natural scrolling (scroll down moves page up)
+#     natural_scroll enabled
+#
+#     # Disable touchpad while typing to prevent accidental palms
+#     dwt enabled
+#
+#     # Right click with 2 fingers, middle click with 3 fingers
+#     click_method clickfinger
+#
+#     # Elan touchpads often feel better with a 'flat' profile to remove erratic acceleration curves
+#     # accel_profile flat
+#
+#     # Adjust speed between -1.0 and 1.0 (start at 0.0 for flat, adjust up if too slow)
+#     # pointer_accel 0.0
+# }
+
+## Touchpad gestures 
+# Swipe right with 4 fingers to go to the previous workspace
+bindgesture swipe:4:right workspace prev
+
+# Swipe left with 4 fingers to go to the next workspace
+bindgesture swipe:4:left workspace next
 # ------------- Mouse bindings for floating windows
+
 floating_modifier $mainMod normal
+
+# Pinch inward with 4 fingers to open application launcher
+bindgesture pinch:4:inward exec wofi --show drun
+
+# Swipe up with 3 fingers to toggle floating state on the focused window
+bindgesture swipe:3:up floating toggle
+
+# Swipe down with 3 fingers to set the current container layout to tabbed
+bindgesture swipe:3:down layout tabbed
+
 
 # ------------- Design & Borders
 # Matched to border_size = 2, gaps_in = 2, gaps_out = 4
-gaps inner 2
-gaps outer 4
+gaps inner 0
+gaps outer 0
 default_border pixel 2
 default_floating_border pixel 2
 
@@ -140,6 +192,8 @@ for_window [app_id="org.gnome.FileRoller"]   floating enable, move position cent
 for_window [app_id="zenity"]   floating enable, move position center, resize set 700 500
 for_window [class="bluetui-popup"]           floating enable, border pixel 2, resize set 700 700, move absolute position 610 30
 for_window [class="impala-popup"]            floating enable, border pixel 2, resize set 700 700, move absolute position 610 30
+for_window [app_id="org.telegram.desktop"]    floating enable, border pixel 2, resize set 900 700, move absolute position 610 30
+for_window [app_id="wdisplays"]              floating enable, resize set 900 600, move position center
 
 # Unity popups minimum boundaries rules
 for_window [class="Unity" title="Project Settings"] floating enable, resize set 250 250
@@ -154,3 +208,5 @@ for_window [class="Unity" title="HDR Color"] floating enable, move position cent
 
 
 include @sysconfdir@/sway/config.d/*
+
+include output.conf

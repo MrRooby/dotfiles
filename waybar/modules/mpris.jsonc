@@ -28,7 +28,8 @@
 		// "ellipsis":
 		// "rotate":
 		// "min-length":
-		"max-length": 1000
+		// keeps the right block narrow enough for "fixed-center" to hold
+		"max-length": 40
 		// "align":
 		// "justify":
 		// "expand":

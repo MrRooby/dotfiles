@@ -1,12 +1,12 @@
-
 {
 	"custom/fan": {
-		"interval": 1,
+		"interval": 5,
 		"format": " {}RPM",
 		// "format-icons":
-		"min-length": 7,
-		"max-length": 7,
-    "exec": "sensors | awk '/Fan 1:/ {val=$3} END {print (val ? val : '0')}'",
+		"min-length": 9,
+		// "max-length": 9 would clip a 4-digit reading exactly at the edge
+		// "max-length":
+		"exec": "~/.config/waybar/scripts/fan.sh",
 		// "align":
 		// "justify":
 		// "rotate":

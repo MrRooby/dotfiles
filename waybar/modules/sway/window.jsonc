@@ -1,6 +1,6 @@
 {
-	"hyprland/window": {
-		"format": "{}",
+	"sway/window": {
+		"format": "{title}",
 		"rewrite": {
 			"": "Desktop",
 			"kitty": "Terminal",
@@ -11,8 +11,9 @@
 		// "icon":
 		// "icon-size":
 		// "min-length":
-		// "max-length":
-		// "tooltip":
+		// keeps modules-left narrow enough for "fixed-center" to hold
+		"max-length": 45,
+		"tooltip": false,
 		"swap-icon-label": false
 		// "expand":
 	}

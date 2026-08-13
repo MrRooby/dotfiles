@@ -3,6 +3,8 @@
 ------------------*/
 
 #custom-fan {
+	/* leftmost module: extra room towards the pointed end of the island */
+	padding: 0 6px 0 12px;
   background-color: @temperature;
   color: @dirty-orange;
 }
@@ -120,6 +122,12 @@
   color: @dirty-orange;
 	background-color: @tray;
 	padding: 0 8px 0 8px;
+}
+#custom-tailscale {
+	/* rightmost module: extra room towards the pointed end of the island */
+  color: @dirty-orange;
+	background-color: @tray;
+	padding: 0 12px 0 6px;
 }
 #custom-right_div.5 {
 	color: @tray;

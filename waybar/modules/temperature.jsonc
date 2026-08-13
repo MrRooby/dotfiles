@@ -2,9 +2,9 @@
 	"temperature": {
 		// "thermal-zone": 1,
 		// "hwmon-path":
-    "hwmon-path": "/sys/class/hwmon/hwmon4/temp1_input",
-		// "hwmon-path-abs":
-		// "input-filename":
+		// the hwmon index is not stable across boots, so resolve it at runtime
+		"hwmon-path-abs": "/sys/devices/platform/coretemp.0/hwmon",
+		"input-filename": "temp1_input",
 		// "warning-threshold":
 		"critical-threshold": 90,
 		"interval": 1,

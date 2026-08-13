@@ -18,7 +18,8 @@
     "modules-left": [
         "custom/left_div#1",
         "sway/workspaces",
-        "custom/right_div#1"
+        "custom/right_div#1",
+        "sway/window"
     ],
     "modules-center": [
         "custom/left_div#2",
@@ -37,6 +38,7 @@
         "network",
         "bluetooth",
         "custom/hotspot",
+        "custom/tailscale",
         "custom/right_div#5"
     ],
     "modules-right": [
@@ -75,7 +77,7 @@
     "mode": "dock",
     // "start_hidden":
     // "modifier-reset":
-    // "fixed-center":
+    "fixed-center": true,
     // "passthrough":
     // "ipc":
     // "id":

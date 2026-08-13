@@ -105,3 +105,6 @@ done
 if [[ -x $(command -v fortune) && -x $(command -v cowsay) ]]; then
     fortune | cowsay
 fi
+export PATH="$HOME/.local/bin:$PATH"
+
+export QSYS_ROOTDIR="/media/bartek/LEXAR/DEV/FPGA/Altera/quartus/sopc_builder/bin"
