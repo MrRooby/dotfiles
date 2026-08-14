@@ -52,5 +52,17 @@ return {
     },
   },
 
+  {
+    "klimeryk/vim-monkey-c",
+    lazy = false,
+    config = function()
+      vim.filetype.add({
+        extension = {
+          mc = "monkeyc",
+        },
+      })
+    end,
+  },
+
   -- Themes --
 }
