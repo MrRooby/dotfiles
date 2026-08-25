@@ -1,0 +1,21 @@
+{
+	/*----------------------------------------
+	    battery level, power detail in tooltip
+	----------------------------------------*/
+
+	// replaces the built-in "battery" module: its tooltip-format has no charge
+	// rate in %/h, no USB-PD charger contract and no charge-stop threshold.
+	// the icon ramp, the state classes and the low/critical/full notifications
+	// moved into the script along with it.
+	//
+	// interval 5 rather than the 1s cpu.sh polls at: these reads go through the
+	// ACPI EC rather than /proc, and the wattage still feels live under the
+	// cursor at this cadence.
+	"custom/battery": {
+		"exec": "~/.config/waybar/scripts/battery.sh",
+		"return-type": "json",
+		"interval": 5,
+		"min-length": 7,
+		"max-length": 7
+	}
+}

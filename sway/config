@@ -11,10 +11,12 @@ set $fileManager nemo
 
 # ------------- Autostart
 # Fixed order to prevent D-Bus and portal timeouts
-exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+exec sh -c 'dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE SWAYSOCK XCURSOR_THEME XCURSOR_SIZE; systemctl --user start sway-session.target'
 exec --no-startup-id sh -c 'eval $(gnome-keyring-daemon --login) eval $(gnome-keyring-daemon --start --components=secrets,ssh) export SSH_AUTH_SOCK'
 exec nm-applet
-exec waybar
+# via the wrapper, which preloads the fast-tooltip shim -- GTK3 hardcodes a
+# 500ms tooltip delay. Falls back to plain waybar if it cannot build.
+exec ~/.config/waybar/scripts/waybar-run.sh
 
 exec /usr/libexec/lxqt-policykit-agent
 exec systemctl --user import-environment QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME
@@ -28,7 +30,7 @@ exec hypridle
 exec rclone mount gdrive: ~/GoogleDrive --vfs-cache-mode full &
 
 # Set retro-cursor parameters
-exec_always swaymsg seat seat0 xcursor_theme retro-cursor 24
+exec_always swaymsg seat seat0 xcursor_theme retro-cursor 32
 
 # Wallpapers matching hyprpaper active target
 exec_always swaybg -i ~/Pictures/wallpapers/odyssey.jpg -m fill
@@ -72,7 +74,10 @@ bindsym --locked XF86AudioNext exec playerctl next
 bindsym XF86Calculator exec qalculate-gtk
 
 # Lid actions
-bindswitch --locked lid:on exec hyprlock
+# caffeine.sh rather than hyprlock directly: sway ignores logind inhibitors,
+# so the waybar caffeine toggle can only veto the lock screen from inside the
+# command sway runs. With caffeine off this locks exactly as before.
+bindswitch --locked lid:on exec ~/.config/waybar/scripts/caffeine.sh lid
 
 # ------------- Workspaces
 # Switch workspaces ($mainMod + [0-9])
@@ -195,6 +200,8 @@ for_window [class="impala-popup"]            floating enable, border pixel 2, re
 for_window [app_id="org.telegram.desktop"]   floating enable, border pixel 2, resize set 900 700, move absolute position 610 30
 for_window [app_id="wdisplays"]              floating enable, resize set 900 600, move position center
 for_window [app_id="org.gnome.Loupe"]        floating enable, resize set 800 600, move position center
+for_window [class="Vtk"]                     floating enable, resize set 800 600, move position center
+for_window [app_id="org.pulseaudio.pavucontrol"] floating enable, resize set 700 900, move position center
 
 # Unity popups minimum boundaries rules
 for_window [class="Unity" title="Project Settings"] floating enable, resize set 250 250

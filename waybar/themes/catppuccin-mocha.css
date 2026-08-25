@@ -61,3 +61,29 @@
 @define-color warning       @yellow;
 @define-color critical      @red;
 @define-color charging      @green;
+
+/*
+	fork additions -- referenced by styles/*.css and resolved at runtime by
+	scripts/battery.sh. GTK requires a color to be defined before it is
+	referenced, so the dirty-* base comes first.
+*/
+
+@define-color dirty-orange     #CE6B29;
+@define-color dirty-red        @red;
+@define-color dirty-green      @green;
+@define-color dirty-background @mantle;
+@define-color dirty-fg         @text;
+@define-color dirty-dim        @overlay1;
+
+/* tooltip colors */
+
+@define-color tooltip-bg    @dirty-background;
+@define-color tooltip-br    @dirty-orange;
+@define-color tooltip-fg    @dirty-fg;
+@define-color tooltip-dim   @dirty-dim;
+
+/* power profile colors */
+
+@define-color pp-performance @dirty-red;
+@define-color pp-balanced    @dirty-orange;
+@define-color pp-saver       @dirty-green;

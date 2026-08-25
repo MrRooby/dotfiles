@@ -26,7 +26,7 @@
         "custom/left_div#2",
         "custom/fan",
         "custom/left_div#3",
-        "temperature",
+        "custom/temperature",
         "custom/left_div#4",
         "custom/cpu",
         "custom/left_div#5",
@@ -40,6 +40,7 @@
         "bluetooth",
         "custom/hotspot",
         "custom/tailscale",
+        "custom/caffeine",
         "custom/right_div#5"
     ],
     "modules-right": [

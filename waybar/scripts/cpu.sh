@@ -138,15 +138,16 @@ head2="$(center "$plain2")${plain2}"
 tooltip="${head1}\n${head2}\n\n${grid%\\n}"
 
 # the icon doubles as the power profile indicator. read over the system bus
-# rather than with powerprofilesctl, which is a python script and far too
-# expensive to spawn once a second.
-profile=$(busctl get-property net.hadess.PowerProfiles /net/hadess/PowerProfiles \
-	net.hadess.PowerProfiles ActiveProfile 2>/dev/null | awk -F'"' '{print $2}')
+# rather than shelling out to tlp-stat, which takes the better part of a second
+# and this runs once a second. tlp-pd serves the profile here.
+profile=$(busctl get-property org.freedesktop.UPower.PowerProfiles \
+	/org/freedesktop/UPower/PowerProfiles \
+	org.freedesktop.UPower.PowerProfiles ActiveProfile 2>/dev/null | awk -F'"' '{print $2}')
 case "$profile" in
 	performance) icon="" ;;
 	balanced)    icon="󰊚" ;;
 	power-saver) icon="󰌪" ;;
-	*)           icon="󰍛" ;;   # power-profiles-daemon unavailable
+	*)           icon="󰍛" ;;   # tlp-pd unavailable
 esac
 
 # states.css keys off these classes

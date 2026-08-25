@@ -1,0 +1,16 @@
+{
+	/*----------------------------------------
+	    cpu temperature, all-sensor tooltip
+	----------------------------------------*/
+
+	// replaces the built-in "temperature" module: that one reads a single
+	// hwmon input and its tooltip-format only understands {temperatureC} /
+	// {temperatureF}, so it can't list the GPU, SSD, EC and zone sensors
+	"custom/temperature": {
+		"exec": "~/.config/waybar/scripts/temperature.sh",
+		"return-type": "json",
+		"interval": 2,
+		"min-length": 8,
+		"max-length": 8
+	}
+}

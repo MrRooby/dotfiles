@@ -57,7 +57,7 @@
   background-color: @battery;
   color: @dirty-orange;
 }
-#battery{
+#custom-battery{
 	/* border-radius: 16px; */
 	/* padding: 0 19px 0 16px; */
 	color: @main-bg;

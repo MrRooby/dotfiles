@@ -26,10 +26,17 @@
 		"tooltip-format-disabled": "Bluetooth Disabled",
 		"tooltip-format-off": "Bluetooth Off",
 		"tooltip-format-on": "Bluetooth Disconnected",
-		"tooltip-format-connected": "Device: {device_alias}",
-		"tooltip-format-enumerate-connected": "Device: {device_alias}",
-		"tooltip-format-connected-battery": "Device: {device_alias}\nBattery: {device_battery_percentage}%",
-		"tooltip-format-enumerate-connected-battery": "Device: {device_alias}\nBattery: {device_battery_percentage}%"
+
+		// {device_enumerate} is the only replacement that covers *every*
+		// connected device -- {device_alias} on its own resolves to the single
+		// preferred device, which is why this used to show one headset and no
+		// second line. Each enumerated line is rendered with the two formats
+		// below, waybar picking -battery for devices that expose
+		// org.bluez.Battery1 and the plain one for those that do not.
+		"tooltip-format-connected": "{device_enumerate}",
+		"tooltip-format-connected-battery": "{device_enumerate}",
+		"tooltip-format-enumerate-connected": "<b>{device_alias}</b>",
+		"tooltip-format-enumerate-connected-battery": "<b>{device_alias}</b>: {device_battery_percentage}%"
 		// "menu":
 		// "menu-file":
 		// "menu-actions":

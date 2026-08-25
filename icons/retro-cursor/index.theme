@@ -1,0 +1,4 @@
+[Icon Theme]
+Name=retro-cursor
+Comment=Retro Windows-style pixel cursors
+Inherits=Adwaita

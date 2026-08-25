@@ -21,17 +21,18 @@
 
 #memory.warning,
 #custom-cpu.warning,
-#battery.warning {
+#custom-temperature.warning,
+#custom-battery.warning {
 	color: @warning;
 }
 
-#temperature.critical,
+#custom-temperature.critical,
 #memory.critical,
 #custom-cpu.critical,
-#battery.critical {
+#custom-battery.critical {
 	color: @critical;
 }
 
-#battery.charging {
+#custom-battery.charging {
 	color: @charging;
 }

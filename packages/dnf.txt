@@ -1,0 +1,65 @@
+# Every package this desktop needs. Lines starting with # are ignored.
+
+# --- compositor + session ---
+sway
+swaybg
+swayidle
+swaylock
+ly
+
+# --- bar, launcher, notifications, terminal ---
+waybar
+wofi
+mako
+dunst
+kitty
+
+# --- idle / lock (COPR: ashbuk/Hyprland-Fedora) ---
+hypridle
+hyprlock
+
+# --- portals, auth, keyring ---
+xdg-desktop-portal-wlr
+xdg-desktop-portal-gtk
+polkit
+gnome-keyring
+
+# --- audio ---
+pipewire
+pipewire-pulseaudio
+wireplumber
+pavucontrol
+
+# --- hardware controls ---
+brightnessctl
+playerctl
+network-manager-applet
+keyd
+
+# --- screenshots / clipboard / wayland tools ---
+grim
+slurp
+swappy
+wl-clipboard
+wtype
+wev
+
+# --- file manager + GTK/Qt theming ---
+nemo
+qt6ct
+kvantum
+kvantum-qt5
+adwaita-icon-theme
+adwaita-cursor-theme
+
+# --- fonts ---
+jetbrains-mono-fonts
+google-noto-sans-fonts
+google-noto-emoji-fonts
+
+# --- scripting deps used by waybar modules and sway ---
+jq
+socat
+python3-i3ipc
+rsync
+git

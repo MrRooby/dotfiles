@@ -1,0 +1,42 @@
+
+# Font
+font=JetBrainsMono Nerd Font 10
+
+# Position & size
+anchor=bottom-right
+# top,right,bottom,left — flush into the corner, top margin = gap when stacked
+margin=6,0,0,0
+padding=10
+width=360
+text-alignment=left
+max-visible=5
+
+# Colors — shared with wofi/style.css and waybar tooltips
+# background #232634, foreground #d8cab8, accent #CE6B29
+background-color=#232634
+text-color=#d8cab8
+border-color=#CE6B29
+border-size=2
+border-radius=0
+progress-color=over #CE6B2940
+
+# Icons
+icons=1
+max-icon-size=64
+
+# Timeout
+default-timeout=4000
+
+# Per-urgency overrides
+[urgency=low]
+border-color=#9b9b9b
+default-timeout=2500
+
+[urgency=normal]
+border-color=#CE6B29
+default-timeout=4000
+
+# same signal colour as sway's client.urgent
+[urgency=critical]
+border-color=#fca002
+default-timeout=0

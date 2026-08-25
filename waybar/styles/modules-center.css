@@ -15,7 +15,7 @@
 #custom-left_div.2 {
 	color: @temperature;
 }
-#temperature {
+#custom-temperature {
 	background-color: @memory;
   color: @dirty-orange;
 }
@@ -124,6 +124,11 @@
 	padding: 0 8px 0 8px;
 }
 #custom-tailscale {
+  color: @dirty-orange;
+	background-color: @tray;
+	padding: 0 8px 0 8px;
+}
+#custom-caffeine {
 	/* rightmost module: extra room towards the pointed end of the island */
   color: @dirty-orange;
 	background-color: @tray;

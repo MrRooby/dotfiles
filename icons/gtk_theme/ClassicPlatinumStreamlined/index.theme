@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Mac OS 9 Classic
+Comment= A set of Platinum-like GTK themes, forked and edited and updated by the diinki.
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Mac OS 9 Classic
+MetacityTheme=Mac OS 9 Classic
+IconTheme=RetroismIcons
+CursorTheme=
+ButtonLayout=close,minimize,maximize:

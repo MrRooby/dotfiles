@@ -13,7 +13,7 @@
 	"group/battery_profile": {
 		"orientation": "horizontal",
 		"modules": [
-			"battery",
+			"custom/battery",
 			"custom/left_div#10",
 			"custom/pp_performance",
 			"custom/pp_balanced",

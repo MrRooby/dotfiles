@@ -1,0 +1,35 @@
+[Icon Theme]
+Name=nostromo
+Comment=Warm bronze/parchment recolour of Adwaita
+Example=folder
+Inherits=Adwaita,AdwaitaLegacy,hicolor
+Hidden=false
+Directories=scalable/devices,scalable/mimetypes,scalable/places,scalable/status
+
+[scalable/devices]
+Context=Devices
+Size=128
+MinSize=8
+MaxSize=512
+Type=Scalable
+
+[scalable/mimetypes]
+Context=MimeTypes
+Size=128
+MinSize=8
+MaxSize=512
+Type=Scalable
+
+[scalable/places]
+Context=Places
+Size=128
+MinSize=8
+MaxSize=512
+Type=Scalable
+
+[scalable/status]
+Context=Status
+Size=128
+MinSize=8
+MaxSize=512
+Type=Scalable

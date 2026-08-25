@@ -1,4 +1,9 @@
 {
+	// dead config. the bar shows "custom/battery" instead — see
+	// modules/custom/battery.jsonc for why. waybar only instantiates
+	// modules named in a bar or a group, so this definition is inert;
+	// it is kept so the swap back is a one-line change in
+	// modules/custom/power-profile.jsonc.
 	"battery": {
 		// "bat":
 		// "adapter":

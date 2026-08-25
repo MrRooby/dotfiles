@@ -1,0 +1,23 @@
+{
+	/*----------------------------------------
+	    caffeine: inhibit sleep and lid close
+	----------------------------------------*/
+
+	// the built-in "idle_inhibitor" module only speaks the wayland idle
+	// protocol, which hypridle honours but logind does not -- so the lid would
+	// still suspend. the script holds a systemd inhibitor instead, which both
+	// daemons respect. see scripts/caffeine.sh for the full reasoning.
+	//
+	// signal 8 is the next one free (1 = system_update, 7 = power-profile);
+	// the click handler raises it so the icon flips immediately rather than at
+	// the next poll.
+	"custom/caffeine": {
+		"exec": "~/.config/waybar/scripts/caffeine.sh",
+		"return-type": "json",
+		"interval": 10,
+		"signal": 8,
+		"on-click": "~/.config/waybar/scripts/caffeine.sh toggle",
+		"min-length": 3,
+		"max-length": 3
+	}
+}

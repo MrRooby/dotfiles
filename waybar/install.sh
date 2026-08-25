@@ -14,6 +14,9 @@ DEPS=(
   "dnf-utils"            # dnf check-update
   "pipewire-pulseaudio"
   "jetbrains-mono-fonts" # closest Nerd-font alternative in Fedora repos
+  "gcc"                  # builds tools/fast-tooltip.c
+  "glib2-devel"          # its only header dependency
+  "pkgconf-pkg-config"   # locates those headers
 )
 
 main() {
@@ -41,7 +44,8 @@ main() {
   chmod -v +x ~/.config/waybar/scripts/*.sh 2>/dev/null
 
   pkill waybar
-  waybar &>/dev/null &
+  # through the wrapper so the fast-tooltip shim gets built and preloaded
+  ~/.config/waybar/scripts/waybar-run.sh &>/dev/null &
   disown
 
   if ((errors > 0)); then

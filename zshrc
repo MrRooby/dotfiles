@@ -108,3 +108,5 @@ fi
 export PATH="$HOME/.local/bin:$PATH"
 
 export QSYS_ROOTDIR="/media/bartek/LEXAR/DEV/FPGA/Altera/quartus/sopc_builder/bin"
+
+hash -d LEXAR="/run/media/$USER/YOUR_DRIVE_NAME"

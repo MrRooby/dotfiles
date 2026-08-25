@@ -1,0 +1,4 @@
+# COPR repos required by this setup. One per line, "owner/project".
+# Enabled with: sudo dnf copr enable -y <line>
+alternateved/keyd
+ashbuk/Hyprland-Fedora
