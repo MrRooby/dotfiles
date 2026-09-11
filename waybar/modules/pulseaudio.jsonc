@@ -34,9 +34,11 @@
 		// "align":
 		// "justify":
 		// "scroll-step":
-		"on-click": "~/.config/waybar/scripts/volume.sh output mute",
+		// pavucontrol is a GApplication: a second click raises the open
+		// window instead of starting another. Tab 3 is "Output Devices".
+		"on-click": "pavucontrol --tab=3",
 		// "on-click-middle":
-		// "on-click-right":
+		"on-click-right": "~/.config/waybar/scripts/volume.sh output mute",
 		// "on-update":
 		"on-scroll-up": "~/.config/waybar/scripts/volume.sh output raise",
 		"on-scroll-down": "~/.config/waybar/scripts/volume.sh output lower",
@@ -71,9 +73,10 @@
 		// "align":
 		// "justify":
 		// "scroll-step":
-		"on-click": "~/.config/waybar/scripts/volume.sh input mute",
+		// tab 4 is "Input Devices"
+		"on-click": "pavucontrol --tab=4",
 		// "on-click-middle":
-		// "on-click-right":
+		"on-click-right": "~/.config/waybar/scripts/volume.sh input mute",
 		// "on-update":
 		"on-scroll-up": "~/.config/waybar/scripts/volume.sh input raise",
 		"on-scroll-down": "~/.config/waybar/scripts/volume.sh input lower",

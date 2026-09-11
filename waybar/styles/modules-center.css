@@ -147,5 +147,5 @@
    pad makes up the difference; it is transparent and sits before the first
    divider, so nothing is visible. */
 #custom-center_pad {
-	min-width: 25px;
+	min-width: 66px;
 }

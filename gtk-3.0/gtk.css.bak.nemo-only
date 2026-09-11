@@ -1,0 +1,293 @@
+/* ══════════════════════════════════════════════════════════════════════
+   nostromo · nemo
+   Same visual language as waybar / wofi / sway:
+     flat @surface panel, square corners, 2px dirty-orange frame,
+     parchment text, ORANGE for every active/hover/selected state.
+   Scoped to `.nemo-window` — no other GTK3 app is affected, except the
+   clearly-marked global tooltip block at the bottom.
+   Revert: delete this file.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@define-color n_crust   #11111b;   /* waybar @crust — darkest chrome  */
+@define-color n_surface #232634;   /* @dirty-background — content     */
+@define-color n_fg      #d8cab8;   /* @dirty-fg                       */
+@define-color n_dim     #9b9b9b;   /* @dirty-dim                      */
+@define-color n_accent  #CE6B29;   /* @dirty-orange                   */
+@define-color n_red     #C4402B;   /* @dirty-red                      */
+@define-color n_green   #5F9E4A;   /* @dirty-green                    */
+@define-color n_urgent  #fca002;
+@define-color n_line    #2b2f3d;
+@define-color n_deep    #000000;   /* dolny pasek - najciemniejszy punkt okna */
+
+/* ── base + the wofi-style 2px orange frame ───────────────────────── */
+.nemo-window {
+	background-color: @n_surface;
+	color: @n_fg;
+	font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
+	font-size: 10pt;
+	border: 2px solid @n_accent;
+}
+.nemo-window * { border-radius: 0; outline: none; }
+
+/* ── menubar — waybar hover language: orange fill, dark text ──────── */
+.nemo-window menubar {
+	background-color: @n_crust;
+	background-image: none;
+	color: @n_fg;
+	border-bottom: 1px solid @n_line;
+	padding: 0 2px;
+	min-height: 0;
+}
+.nemo-window menubar > menuitem { color: @n_fg; padding: 2px 9px; min-height: 0; }
+.nemo-window menubar > menuitem:hover {
+	background-color: @n_accent;
+	color: @n_surface;
+	font-weight: bold;
+}
+
+/* ── toolbar — icons orange, like waybar module glyphs ────────────── */
+.nemo-window toolbar,
+.nemo-window .primary-toolbar,
+.nemo-window headerbar {
+	background-color: @n_crust;
+	background-image: none;
+	border-bottom: 1px solid @n_line;
+	padding: 1px 3px;
+	min-height: 0;
+}
+.nemo-window toolbar button,
+.nemo-window .primary-toolbar button {
+	background: transparent;
+	background-image: none;
+	border: none;
+	box-shadow: none;
+	color: @n_accent;
+	padding: 3px 7px;
+	min-height: 0;
+	min-width: 0;
+}
+.nemo-window toolbar button:hover,
+.nemo-window .primary-toolbar button:hover {
+	background-color: @n_accent;
+	color: @n_crust;
+}
+.nemo-window toolbar button:checked,
+.nemo-window toolbar button:active,
+.nemo-window .primary-toolbar button:checked {
+	background-color: @n_accent;
+	color: @n_crust;
+	font-weight: bold;
+}
+.nemo-window button:disabled { color: alpha(@n_dim, 0.35); background: transparent; }
+
+/* ── path bar — current segment is the orange one ─────────────────── */
+.nemo-window .path-bar button { background: transparent; border: none; box-shadow: none;
+                                color: @n_dim; padding: 3px 8px; min-height: 0; }
+.nemo-window .path-bar button:hover  { color: @n_accent; background-color: @n_surface; }
+.nemo-window .path-bar button:checked{ color: @n_accent; font-weight: bold;
+                                       box-shadow: inset 0 -2px @n_accent; }
+
+/* ── sidebar ──────────────────────────────────────────────────────── */
+.nemo-window .nemo-places-sidebar,
+.nemo-window .sidebar,
+.nemo-window .sidebar .view,
+.nemo-window .nemo-places-sidebar .view {
+	background-color: @n_crust;
+	color: @n_fg;
+	border-right: 1px solid @n_line;
+}
+/* disk-usage bar under mounted places.
+   Nemo installs these as GTK *style properties*, and style properties are NOT
+   inherited - the rule has to match the treeview node itself, not the sidebar
+   container. Harmless on other treeviews: only NemoPlacesTreeView declares them. */
+.nemo-window treeview,
+.nemo-window treeview.view,
+.nemo-window .nemo-places-sidebar,
+.nemo-window .nemo-places-sidebar treeview,
+.nemo-window .sidebar treeview,
+.nemo-window NemoPlacesTreeView,
+.nemo-window NemoPlacesSidebar {
+	-NemoPlacesTreeView-disk-full-fg-color: #CE6B29;
+	-NemoPlacesTreeView-disk-full-bg-color: #2b2f3d;
+	-NemoPlacesTreeView-disk-full-bar-width: 3;
+	-NemoPlacesTreeView-disk-full-bar-radius: 0;
+	-NemoPlacesSidebar-disk-full-fg-color: #CE6B29;
+	-NemoPlacesSidebar-disk-full-bg-color: #2b2f3d;
+	-NemoPlacesSidebar-disk-full-bar-width: 3;
+	-NemoPlacesSidebar-disk-full-bar-radius: 0;
+}
+.nemo-window .nemo-places-sidebar .view:hover,
+.nemo-window .sidebar .view:hover { background-color: @n_surface; color: @n_accent; }
+.nemo-window .nemo-places-sidebar .view:selected,
+.nemo-window .sidebar .view:selected {              /* == wofi #entry:selected */
+	background-color: @n_accent;
+	color: @n_surface;
+	font-weight: bold;
+}
+.nemo-window .nemo-places-sidebar .view:selected:backdrop {
+	background-color: alpha(@n_accent, 0.5); color: @n_fg;
+}
+
+/* ── file list ────────────────────────────────────────────────────── */
+.nemo-window treeview.view {
+	background-color: @n_surface;
+	color: @n_fg;
+	-GtkTreeView-vertical-separator: 0;
+	-GtkTreeView-grid-line-width: 0;
+}
+.nemo-window treeview.view:hover { background-color: shade(@n_surface, 1.35); color: @n_accent; }
+.nemo-window treeview.view:selected {               /* == wofi #entry:selected */
+	background-color: @n_accent;
+	color: @n_surface;
+	font-weight: bold;
+}
+.nemo-window treeview.view:selected:backdrop { background-color: alpha(@n_accent, 0.5); color: @n_fg; }
+.nemo-window treeview.view header button {
+	background-color: @n_crust;
+	background-image: none;
+	color: @n_dim;
+	font-size: 9pt;
+	border: none;
+	border-right: 1px solid @n_line;
+	border-bottom: 1px solid alpha(@n_accent, 0.45);
+	padding: 2px 6px;
+	min-height: 0;
+}
+.nemo-window treeview.view header button:hover { color: @n_accent; }
+.nemo-window treeview.view header button:checked { color: @n_accent; font-weight: bold; }
+
+/* ── icon / compact view ──────────────────────────────────────────── */
+.nemo-window .nemo-canvas-item { color: @n_fg; }
+.nemo-window .nemo-canvas-item:selected {
+	background-color: @n_accent; color: @n_surface; font-weight: bold;
+}
+
+/* ── tabs ─────────────────────────────────────────────────────────── */
+.nemo-window notebook > header { background-color: @n_crust; border: none; }
+.nemo-window notebook > header tab {
+	background-color: transparent; color: @n_dim; border: none;
+	box-shadow: inset 0 -2px transparent; padding: 3px 12px; min-height: 0;
+}
+.nemo-window notebook > header tab:hover   { color: @n_accent; }
+.nemo-window notebook > header tab:checked { color: @n_accent; font-weight: bold;
+                                             box-shadow: inset 0 -2px @n_accent; }
+
+/* ── entries — wofi #input language (orange focus + italic) ───────── */
+.nemo-window entry {
+	background-color: @n_crust;
+	background-image: none;
+	color: @n_fg;
+	caret-color: @n_accent;
+	border: 1px solid @n_line;
+	padding: 3px 6px;
+	min-height: 0;
+	box-shadow: none;
+}
+.nemo-window entry:focus     { border-color: @n_accent; font-style: italic; }
+.nemo-window entry selection { background-color: @n_accent; color: @n_surface; }
+
+/* ── all buttons flat + orange (bottom-bar toggles kept Adwaita's fill) ─ */
+.nemo-window button {
+	background-color: transparent;
+	background-image: none;
+	border: none;
+	box-shadow: none;
+	color: @n_accent;
+	min-height: 0;
+	padding: 3px 7px;
+}
+.nemo-window button:hover,
+.nemo-window button:checked,
+.nemo-window button:active {
+	background-color: @n_accent;
+	color: @n_crust;
+}
+.nemo-window button:disabled { color: alpha(@n_dim, 0.35); background-color: transparent; }
+/* dialogs keep a visible outline so OK/Cancel stay readable */
+.nemo-window dialog button,
+.nemo-window messagedialog button {
+	border: 1px solid @n_line;
+	padding: 4px 12px;
+}
+.nemo-window dialog button:hover,
+.nemo-window messagedialog button:hover { border-color: @n_accent; }
+
+/* ── bottom bar — one flat colour end to end ──────────────────────── */
+.nemo-window NemoStatusBar {
+	background-color: @n_deep;
+	background-image: none;
+	border: none;
+	border-top: 1px solid @n_accent;
+	padding: 0 4px;
+	min-height: 0;
+}
+/* every child paints nothing, so the bar reads as a single surface */
+.nemo-window NemoStatusBar box,
+.nemo-window NemoStatusBar toolbar,
+.nemo-window NemoStatusBar frame,
+.nemo-window NemoStatusBar frame border,
+.nemo-window NemoStatusBar label,
+.nemo-window NemoStatusBar scale,
+.nemo-window NemoStatusBar button,
+.nemo-window statusbar,
+.nemo-window statusbar box,
+.nemo-window statusbar frame,
+.nemo-window statusbar label,
+.nemo-window .nemo-cluebar-label {
+	background-color: transparent;
+	background-image: none;
+	border: none;
+	box-shadow: none;
+	min-height: 0;
+}
+.nemo-window NemoStatusBar,
+.nemo-window NemoStatusBar label,
+.nemo-window statusbar label { color: @n_fg; font-size: 9pt; }
+.nemo-window NemoStatusBar button { color: @n_accent; padding: 2px 6px; }
+.nemo-window NemoStatusBar button:hover,
+.nemo-window NemoStatusBar button:checked {
+	background-color: @n_accent; color: @n_crust;
+}
+
+/* ── scrollbars ───────────────────────────────────────────────────── */
+.nemo-window scrollbar,
+.nemo-window scrollbar trough,
+.nemo-window scrolledwindow junction {
+	background-color: @n_crust; background-image: none; border: none;
+}
+.nemo-window scrollbar slider {
+	background-color: alpha(@n_dim, 0.30);
+	border: 4px solid transparent;
+	background-clip: padding-box;
+	min-width: 4px; min-height: 4px;
+}
+.nemo-window scrollbar slider:hover  { background-color: @n_accent; }
+.nemo-window scrollbar slider:active { background-color: @n_accent; }
+
+/* ── panes / zoom slider / feedback ───────────────────────────────── */
+.nemo-window paned > separator { background-color: @n_line; min-width: 1px; min-height: 1px; }
+.nemo-window .nemo-inactive-pane treeview.view { background-color: shade(@n_surface, 0.88); }
+.nemo-window scale           { min-height: 0; padding: 0 4px; }
+.nemo-window scale trough    { background-color: @n_line; border: none; box-shadow: none; min-height: 3px; }
+.nemo-window scale highlight { background-color: @n_accent; border: none; }
+.nemo-window scale slider    { background-color: @n_accent; border: none; box-shadow: none;
+                               min-width: 9px; min-height: 9px; margin: -4px; }
+.nemo-window progressbar progress { background-color: @n_accent; }
+.nemo-window progressbar trough   { background-color: @n_line; }
+.nemo-window infobar              { background-color: @n_crust; color: @n_fg;
+                                    border-bottom: 2px solid @n_accent; }
+.nemo-window infobar.warning      { border-bottom-color: @n_urgent; }
+.nemo-window infobar.error        { border-bottom-color: @n_red; }
+
+/* ══ GLOBAL (not nemo-scoped) ══════════════════════════════════════════
+   GTK tooltips are their own toplevel, so they can't be scoped to nemo.
+   This mirrors waybar's styles/tooltips.css exactly, which keeps the
+   desktop consistent. Delete this block if you want stock tooltips. */
+tooltip {
+	background-color: #232634;
+	border: 2px solid #CE6B29;
+	border-radius: 0;
+	padding: 0;
+}
+tooltip > box  { padding: 6px 10px; }
+tooltip label  { color: #d8cab8; font-weight: normal; }

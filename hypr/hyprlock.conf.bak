@@ -90,9 +90,6 @@ input-field {
 
 auth {
     fingerprint {
-        # BARTOSZ: T14 ma czytnik Synaptics 06cb:00bd obslugiwany przez stock
-        # libfprint. hyprlock gada po DBus do net.reactivated.Fprint, wiec nie
-        # zalezy od pam_fprintd - dziala mimo ze PAM/ly fingerprinta nie maja.
         enabled = true
         ready_message = Scan fingerprint or enter password
         present_message = Scanning fingerprint...

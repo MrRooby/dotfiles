@@ -412,6 +412,7 @@ fi
 
 HYSTERESIS=5       # °C the sensor must fall before the alert re-arms
 REPEAT_AFTER=300   # seconds before a still-hot sensor is announced again
+NOTIFY_TIMEOUT=30000  # ms the popup stays on screen
 
 alert_state="$state.alerts"
 
@@ -445,9 +446,10 @@ for i in "${keep[@]}"; do
 				*)          title="Thermal limit" ;;
 			esac
 
-			# -t 0 rather than relying on the daemon: mako's [urgency=critical]
-			# block already sets default-timeout=0, but stating it here keeps
-			# the "until dismissed" promise independent of that config.
+			# An explicit timeout, because mako's [urgency=critical] block sets
+			# default-timeout=0 and would otherwise keep the popup up until it is
+			# clicked away. Critical urgency stays for the border colour; a
+			# sensor that is still hot comes back after REPEAT_AFTER anyway.
 			#
 			# Run in the foreground on purpose. Backgrounding this loses
 			# notifications outright — a child outliving the script gets reaped
@@ -455,7 +457,7 @@ for i in "${keep[@]}"; do
 			# costs ~20ms and only happens on a threshold crossing. Its output
 			# still goes to /dev/null so it can never touch the pipe waybar is
 			# reading this script's JSON from.
-			notify-send -u critical -t 0 -i dialog-warning \
+			notify-send -u critical -t "$NOTIFY_TIMEOUT" -i dialog-warning \
 				-h "string:x-canonical-private-synchronous:thermal-${keys[i]}" \
 				"$title" \
 				"${groups[i]#* · } · ${labels[i]} reached ${at} °C (limit ${lim} °C)" \

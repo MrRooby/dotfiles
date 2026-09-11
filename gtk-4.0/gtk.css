@@ -1,0 +1,319 @@
+/* ══════════════════════════════════════════════════════════════════════
+   nostromo · every GTK4 app
+   GTK4 twin of ~/.config/gtk-3.0/gtk.css, same visual language as
+   waybar / wofi / sway: flat surface, square corners, 2px dirty-orange
+   frame, parchment text, ORANGE for every active/hover/selected state.
+
+   GTK loads this file on top of whatever theme an app uses -- the stock
+   one for plain GTK4 (pavucontrol), libadwaita's own for GNOME apps -- so
+   nothing is @imported here. The selectors were tuned against the stock
+   dark theme; libadwaita apps take most of their palette from the
+   variables in the first block instead.
+
+   Revert: delete this file.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@define-color n_crust   #11111b;   /* waybar @crust — darkest chrome  */
+@define-color n_surface #232634;   /* @dirty-background — content     */
+@define-color n_fg      #d8cab8;   /* @dirty-fg                       */
+@define-color n_dim     #9b9b9b;   /* @dirty-dim                      */
+@define-color n_accent  #CE6B29;   /* @dirty-orange                   */
+@define-color n_line    #2b2f3d;
+
+/* theme named colours, for apps that paint their own surfaces from them */
+@define-color theme_bg_color                 @n_surface;
+@define-color theme_fg_color                 @n_fg;
+@define-color theme_base_color               @n_surface;
+@define-color theme_text_color               @n_fg;
+@define-color theme_selected_bg_color        @n_accent;
+@define-color theme_selected_fg_color        @n_surface;
+@define-color insensitive_fg_color           @n_dim;
+@define-color borders                        @n_line;
+
+/* ── libadwaita palette ───────────────────────────────────────────────
+   libadwaita >= 1.6 reads these variables everywhere it used to use
+   named colours, so a GNOME app recolours as a whole from here */
+:root {
+	--accent-color:              #CE6B29;
+	--accent-bg-color:           #CE6B29;
+	--accent-fg-color:           #11111b;
+	--window-bg-color:           #232634;
+	--window-fg-color:           #d8cab8;
+	--view-bg-color:             #232634;
+	--view-fg-color:             #d8cab8;
+	--headerbar-bg-color:        #11111b;
+	--headerbar-fg-color:        #d8cab8;
+	--headerbar-backdrop-color:  #11111b;
+	--headerbar-border-color:    #2b2f3d;
+	--headerbar-shade-color:     transparent;
+	--sidebar-bg-color:          #11111b;
+	--sidebar-fg-color:          #d8cab8;
+	--sidebar-backdrop-color:    #11111b;
+	--sidebar-border-color:      #2b2f3d;
+	--secondary-sidebar-bg-color: #11111b;
+	--secondary-sidebar-fg-color: #d8cab8;
+	--card-bg-color:             #2b2f3d;
+	--card-fg-color:             #d8cab8;
+	--dialog-bg-color:           #232634;
+	--dialog-fg-color:           #d8cab8;
+	--popover-bg-color:          #232634;
+	--popover-fg-color:          #d8cab8;
+	--thumbnail-bg-color:        #2b2f3d;
+	--thumbnail-fg-color:        #d8cab8;
+	--window-radius:             0;
+	--border-color:              #2b2f3d;
+	--monospace-font-family:     "JetBrainsMono Nerd Font";
+}
+
+
+* { border-radius: 0; }
+*:focus-visible { outline-color: alpha(@n_accent, 0.7); }
+
+/* ── base ─────────────────────────────────────────────────────────────
+   no frame of its own: sway already draws a 2px border round every
+   window, and an orange one inside it just doubled up. Popovers and
+   tooltips keep theirs -- sway doesn't border those. */
+window.background {
+	background-color: @n_surface;
+	color: @n_fg;
+	font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
+	font-size: 10pt;
+	border: none;
+}
+window.csd { box-shadow: none; }
+
+/* ── titlebar ─────────────────────────────────────────────────────── */
+headerbar {
+	background-color: @n_crust;
+	background-image: none;
+	color: @n_fg;
+	border-bottom: 1px solid @n_line;
+	box-shadow: none;
+	min-height: 0;
+	padding: 2px 4px;
+}
+headerbar:backdrop { background-color: @n_crust; color: @n_dim; }
+
+/* ── tabs — current one is the orange one, like nemo's ────────────── */
+notebook > header {
+	background-color: @n_crust;
+	border: none;
+	box-shadow: none;
+	border-bottom: 1px solid @n_line;
+}
+/* header.top matches the stock selectors' specificity, which is what it
+   takes to replace their blue underline */
+notebook > header.top > tabs > tab {
+	background-color: transparent;
+	color: @n_dim;
+	border: none;
+	box-shadow: inset 0 -2px transparent;
+	padding: 4px 12px;
+	min-height: 0;
+}
+notebook > header.top > tabs > tab:hover   { color: @n_accent; background-color: transparent;
+                                             box-shadow: inset 0 -2px transparent; }
+notebook > header.top > tabs > tab:checked { color: @n_accent; font-weight: bold;
+                                             box-shadow: inset 0 -2px @n_accent; }
+notebook > stack,
+notebook > stack:not(:only-child),
+scrolledwindow,
+viewport { background-color: @n_surface; }
+
+separator { background-color: @n_line; min-width: 1px; min-height: 1px; }
+label:disabled { color: @n_dim; }
+
+/* ── buttons ──────────────────────────────────────────────────────────
+   same rule as GTK3: text buttons in parchment inside a thin cell
+   outline, icon-only and flat ones keep the orange glyph; any hovered or
+   switched-on button fills orange with dark text.
+   The stock theme paints buttons with background-image, which sits on
+   top of any background-color, so every state clears it explicitly.
+   -gtk-icon-filter goes too: pavucontrol's toggles use full-colour icons
+   and the stock hover brightens them. */
+button,
+button:backdrop {
+	background-color: transparent;
+	background-image: none;
+	border: 1px solid @n_line;
+	box-shadow: none;
+	color: @n_fg;
+	min-height: 0;
+	min-width: 0;
+	padding: 4px 7px;
+	-gtk-icon-filter: none;
+}
+button.image-button,
+button.flat { color: @n_accent; }
+button.flat { border-color: transparent; }
+button:hover,
+button:checked,
+button:active,
+button:checked:hover,
+button:checked:active,
+button:backdrop:checked,
+button.flat:hover,
+button.flat:active,
+button.flat:checked {             /* pavucontrol makes the lock button flat in code */
+	background-color: @n_accent;
+	background-image: none;
+	border-color: @n_accent;
+	color: @n_crust;
+}
+button:disabled { color: alpha(@n_dim, 0.35); background-color: transparent; background-image: none; }
+/* on but greyed out -- the channel lock on a device it can't apply to */
+button:disabled:checked,
+button:backdrop:disabled:checked {
+	background-color: alpha(@n_accent, 0.25);
+	background-image: none;
+	color: @n_dim;
+}
+
+headerbar windowcontrols button { color: @n_dim; padding: 2px; }
+headerbar windowcontrols button:hover { background-color: @n_accent; color: @n_crust; }
+
+/* ── combo boxes / spin buttons / entries — wofi #input language ──── */
+dropdown > button,
+combobox > box > button,
+button.combo,
+spinbutton,
+entry {
+	background-color: @n_crust;
+	background-image: none;
+	color: @n_fg;
+	border: 1px solid @n_line;
+	box-shadow: none;
+	padding: 3px 6px;
+	min-height: 0;
+}
+button.combo:hover,
+button.combo:checked,
+combobox > box > button:hover,
+combobox > box > button:checked {
+	background-color: @n_crust;
+	background-image: none;
+	color: @n_accent;
+	border-color: @n_accent;
+}
+spinbutton > button { border: none; color: @n_accent; }
+spinbutton:focus-within,
+entry:focus-within { border-color: @n_accent; font-style: italic; }
+spinbutton text selection,
+entry selection { background-color: @n_accent; color: @n_surface; }
+text { caret-color: @n_accent; }
+
+/* ── popovers (combo lists) — same frame as the window ────────────── */
+popover > contents,
+popover > arrow {
+	background-color: @n_surface;
+	color: @n_fg;
+	border: 2px solid @n_accent;
+	box-shadow: none;
+}
+popover > contents { padding: 2px; }
+popover modelbutton,
+popover cellview { color: @n_fg; }
+popover modelbutton:hover,
+popover modelbutton:selected,
+popover row:hover,
+popover row:selected,
+popover button:hover {             /* == wofi #entry:selected */
+	background-color: @n_accent;
+	color: @n_surface;
+	font-weight: bold;
+}
+
+/* ── volume sliders ───────────────────────────────────────────────── */
+/* pavucontrol's scales carry marks, and the stock theme draws a marked
+   scale's slider as a PNG arrow -- the .marks-after selector is needed to
+   outrank that, and background-image: none to drop the picture */
+scale { padding: 6px 0; }
+scale > trough,
+scale > trough > fill {
+	background-color: @n_line;
+	border: none;
+	box-shadow: none;
+	min-height: 4px;
+	min-width: 4px;
+}
+scale > trough > highlight { background-color: @n_accent; border: none; margin: 0; }
+scale > trough > slider,
+scale.horizontal.marks-after:not(.marks-before) > trough > slider,
+scale.horizontal.marks-after:not(.marks-before) > trough > slider:hover,
+scale.horizontal.marks-after:not(.marks-before) > trough > slider:active,
+scale.horizontal.marks-before:not(.marks-after) > trough > slider,
+scale.horizontal.marks-before:not(.marks-after) > trough > slider:hover,
+scale.horizontal.marks-before:not(.marks-after) > trough > slider:active {
+	background-color: @n_accent;
+	background-image: none;
+	border: none;
+	box-shadow: none;
+	min-width: 12px;
+	min-height: 12px;
+	margin: -4px;
+}
+scale > trough > slider:hover,
+scale.horizontal.marks-after:not(.marks-before) > trough > slider:hover,
+scale.horizontal.marks-before:not(.marks-after) > trough > slider:hover { background-color: @n_fg; }
+scale marks, scale mark indicator { color: @n_dim; }
+scale > trough > highlight:disabled,
+scale > trough > slider:disabled { background-color: @n_dim; }
+
+/* ── peak meters ──────────────────────────────────────────────────── */
+progressbar > trough          { background-color: @n_line; border: none;
+                                box-shadow: none; min-height: 3px; }
+/* margin 0: the stock -1px pulls the bar over a border that is gone, and
+   an empty meter then measures below zero */
+progressbar > trough > progress { background-color: @n_accent; border: none;
+                                  min-height: 3px; margin: 0; }
+
+levelbar > trough > block         { background-color: @n_line; border: none; box-shadow: none; }
+levelbar > trough > block.filled,
+levelbar > trough > block.low,
+levelbar > trough > block.high,
+levelbar > trough > block.full    { background-color: @n_accent; }
+levelbar > trough > block.empty   { background-color: @n_line; }
+
+/* ── check boxes (Configuration tab, advanced encodings) ──────────── */
+checkbutton check,
+checkbutton check:checked { background-image: none; }
+checkbutton check {
+	background-color: @n_crust;
+	border: 1px solid @n_dim;
+	box-shadow: none;
+	color: @n_crust;
+}
+checkbutton:hover check { border-color: @n_accent; }
+checkbutton check:checked {
+	background-color: @n_accent;
+	border-color: @n_accent;
+	color: @n_crust;
+}
+
+/* ── expander ("Advanced") ────────────────────────────────────────── */
+expander-widget > box > title { color: @n_dim; }
+expander-widget > box > title:hover,
+expander-widget > box > title:hover expander { color: @n_accent; }
+
+/* ── scrollbars ───────────────────────────────────────────────────── */
+scrollbar,
+scrollbar > range > trough { background-color: @n_crust; border: none; }
+scrollbar > range > trough > slider {
+	background-color: alpha(@n_dim, 0.30);
+	border: 4px solid transparent;
+	background-clip: padding-box;
+	/* not the 4px nemo uses: libadwaita pulls its sliders in with negative
+	   margins, and anything under 8px ends up sized below zero */
+	min-width: 8px; min-height: 8px;
+}
+scrollbar > range > trough > slider:hover,
+scrollbar > range > trough > slider:active { background-color: @n_accent; }
+
+/* ── tooltips — mirrors waybar's styles/tooltips.css ──────────────── */
+tooltip {
+	background-color: @n_surface;
+	border: 2px solid @n_accent;
+	box-shadow: none;
+	padding: 6px 10px;
+}
+tooltip label { color: @n_fg; font-weight: normal; }

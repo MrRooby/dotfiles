@@ -14,3 +14,5 @@
 ~/.local/share/icons/nostromo|icons/nostromo
 ~/.icons/retro-cursor|icons/retro-cursor
 ~/Pictures/wallpapers|wallpapers
+~/.mozilla/firefox/zr1gpgry.default-release/chrome|firefox/chrome
+~/.mozilla/firefox/zr1gpgry.default-release/user.js|firefox/user.js

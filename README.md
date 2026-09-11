@@ -56,8 +56,10 @@ packages/dnf.txt      package list
 packages/copr.txt     COPR repositories
 
 sway/  waybar/  wofi/  kitty/  hypr/  mako/  dunst/  nvim/
-gtk-3.0/              nemo theme (gtk.css) + settings.ini
-gtk-4.0/  qt6ct/  Kvantum/
+gtk-3.0/              nostromo theme for every GTK3 app (gtk.css) + settings.ini
+gtk-4.0/              nostromo theme for every GTK4 / libadwaita app + settings.ini
+qt6ct/  Kvantum/
+firefox/              userChrome.css + user.js, installed into the default profile
 
 icons/nostromo/       icon theme (orange folders)
 icons/retro-cursor/   cursors + 120 X11/CSS name aliases

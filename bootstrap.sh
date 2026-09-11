@@ -178,6 +178,24 @@ if has_stage configs; then
     [[ -d "$REPO/nvim" ]] && install_to "$REPO/nvim" "$HOME/.config/nvim"
     [[ -f "$REPO/zshrc" ]] && install_to "$REPO/zshrc" "$HOME/.zshrc"
 
+    # firefox: the profile directory is named at random per machine (and
+    # new installs keep it under ~/.config/mozilla rather than ~/.mozilla),
+    # so the default profile is looked up in profiles.ini, not hard-coded
+    ff_prof=""
+    for ff_root in "$HOME/.config/mozilla/firefox" "$HOME/.mozilla/firefox"; do
+        [[ -f "$ff_root/profiles.ini" ]] || continue
+        ff_prof=$(awk -F= '/^\[Install/ {i=1; next} /^\[/ {i=0} i && $1=="Default" {print $2; exit}' "$ff_root/profiles.ini")
+        [[ -n "$ff_prof" && "$ff_prof" != /* ]] && ff_prof="$ff_root/$ff_prof"
+        [[ -d "$ff_prof" ]] && break
+        ff_prof=""
+    done
+    if [[ -d "$REPO/firefox" && -n "$ff_prof" ]]; then
+        install_to "$REPO/firefox/chrome"  "$ff_prof/chrome"
+        install_to "$REPO/firefox/user.js" "$ff_prof/user.js"
+    elif [[ -d "$REPO/firefox" ]]; then
+        warn "firefox: no profile yet — start Firefox once, then re-run the configs stage"
+    fi
+
     if [[ -f "$HOME/.config/sway/output.conf" ]]; then
         good "~/.config/sway/output.conf left untouched (monitor-specific)"
     else

@@ -1,0 +1,244 @@
+/* ══════════════════════════════════════════════════════════════════════
+   nostromo · firefox
+   Same visual language as waybar / wofi / sway / the GTK stylesheets:
+     crust tab strip, surface toolbar, parchment text, square corners,
+     ORANGE for every hover / selected state, orange-framed popups
+     (sway draws no border round those, as with GTK menus and tooltips).
+
+   Written against Firefox 153's variable names. Every variable is set
+   !important because an installed theme (Biscuit, say) writes its colours
+   as inline style on the root, which outranks a plain userChrome rule.
+
+   Needs toolkit.legacyUserProfileCustomizations.stylesheets = true, which
+   ../user.js sets. Revert: delete this file (and that line in user.js).
+   ══════════════════════════════════════════════════════════════════════ */
+
+:root {
+	--n-crust:   #11111b;   /* waybar @crust — tab strip, fields       */
+	--n-surface: #232634;   /* @dirty-background — toolbar, panels     */
+	--n-fg:      #d8cab8;   /* @dirty-fg                               */
+	--n-dim:     #9b9b9b;   /* @dirty-dim                              */
+	--n-accent:  #CE6B29;   /* @dirty-orange                           */
+	--n-line:    #2b2f3d;
+	--n-focus:   #303446;   /* wofi #input:focus                       */
+
+	/* ── tab strip ─────────────────────────────────────────────────── */
+	--lwt-accent-color:                   var(--n-crust) !important;
+	--lwt-text-color:                     var(--n-fg) !important;
+	--toolbox-background-color:           var(--n-crust) !important;
+	--toolbox-background-color-inactive:  var(--n-crust) !important;
+	--toolbox-text-color:                 var(--n-fg) !important;
+	--toolbox-text-color-inactive:        var(--n-dim) !important;
+
+	--tab-background-color-selected:      var(--n-surface) !important;
+	--tab-selected-textcolor:             var(--n-fg) !important;
+	--tab-background-color-hover:         var(--n-line) !important;
+	--tab-selected-outline-color:         transparent !important;
+	--tab-hover-outline-color:            transparent !important;
+	--tab-selected-shadow:                none !important;
+	--tab-box-shadow:                     none !important;
+	--tab-border-radius:                  0 !important;
+	--tabs-navbar-separator-color:        transparent !important;
+
+	/* ── nav bar ───────────────────────────────────────────────────── */
+	--toolbar-background-color:           var(--n-surface) !important;
+	--toolbar-text-color:                 var(--n-fg) !important;
+	--toolbarbutton-icon-fill:            var(--n-fg) !important;
+	--toolbarbutton-icon-fill-attention:  var(--n-accent) !important;
+	--toolbarbutton-border-radius:        0 !important;
+	--toolbarbutton-background-color-hover:  var(--n-accent) !important;
+	--toolbarbutton-background-color-active: var(--n-accent) !important;
+	--toolbar-button-background-hover:    var(--n-accent) !important;
+	--toolbar-button-background-active:   var(--n-accent) !important;
+	--toolbarseparator-color:             var(--n-line) !important;
+	--chrome-content-separator-color:     var(--n-line) !important;
+
+	/* ── url bar — wofi #input: crust field, orange edge on focus ──── */
+	--toolbar-field-background-color:        var(--n-crust) !important;
+	--toolbar-field-text-color:              var(--n-fg) !important;
+	--toolbar-field-border-color:            var(--n-line) !important;
+	--toolbar-field-background-color-focus:  var(--n-focus) !important;
+	--toolbar-field-text-color-focus:        var(--n-fg) !important;
+	--toolbar-field-border-color-focus:      var(--n-accent) !important;
+	--lwt-toolbar-field-highlight:           var(--n-accent) !important;
+	--lwt-toolbar-field-highlight-text:      var(--n-surface) !important;
+	--urlbar-box-background-color:           var(--n-line) !important;
+	--urlbar-box-background-color-hover:     var(--n-accent) !important;
+	--urlbar-box-text-color:                 var(--n-fg) !important;
+	--urlbar-box-text-color-hover:           var(--n-crust) !important;
+	--urlbarview-background-color-selected:  var(--n-accent) !important;
+	--urlbarview-text-color-selected:        var(--n-surface) !important;
+	--urlbarview-background-color-hover:     var(--n-line) !important;
+	--urlbarview-separator-color:            var(--n-line) !important;
+	--urlbarView-secondary-text-color:       var(--n-dim) !important;
+	--urlbar-border-radius:                  0 !important;
+	--urlbar-inner-border-radius:            0 !important;
+	--urlbar-background-border-radius:       0 !important;
+	--urlbar-selection-border-radius:        0 !important;
+	--urlbarview-border-radius:              0 !important;
+	--urlbarView-row-border-radius:          0 !important;
+	--urlbarView-icon-border-radius:         0 !important;
+
+	/* ── panels, menus, popups — framed like GTK menus / tooltips ──── */
+	--panel-background-color:             var(--n-surface) !important;
+	--panel-text-color:                   var(--n-fg) !important;
+	--panel-border-color:                 var(--n-accent) !important;
+	--panel-separator-color:              var(--n-line) !important;
+	--panel-border-radius:                0 !important;
+	--panel-menuitem-border-radius:       0 !important;
+	--panel-item-button-border-radius:    0 !important;
+	--panel-list-border-radius:           0 !important;
+	--panel-list-background-color:        var(--n-surface) !important;
+	--panel-list-color:                   var(--n-fg) !important;
+	--panel-list-border-color:            var(--n-accent) !important;
+	--menuitem-border-radius:             0 !important;
+	--panel-box-shadow:                   none !important;
+	--panel-list-box-shadow:              none !important;
+
+	--tooltip-background:                 var(--n-surface) !important;
+	--tooltip-foreground:                 var(--n-fg) !important;
+	--tooltip-border:                     var(--n-accent) !important;
+
+	/* ── buttons inside panels / dialogs ───────────────────────────── */
+	--button-background-color:            transparent !important;
+	--button-background-color-hover:      var(--n-accent) !important;
+	--button-background-color-active:     var(--n-accent) !important;
+	--button-text-color:                  var(--n-fg) !important;
+	--button-text-color-hover:            var(--n-crust) !important;
+	--button-text-color-active:           var(--n-crust) !important;
+	--button-border-color:                var(--n-line) !important;
+	--button-border-radius:               0 !important;
+	--button-background-color-primary:        var(--n-accent) !important;
+	--button-background-color-primary-hover:  var(--n-fg) !important;
+	--button-background-color-primary-active: var(--n-fg) !important;
+	--button-text-color-primary:              var(--n-crust) !important;
+	--button-text-color-primary-hover:        var(--n-crust) !important;
+	--input-text-border-radius:           0 !important;
+	--input-text-background-color:        var(--n-crust) !important;
+	--input-text-color:                   var(--n-fg) !important;
+
+	/* ── everything else that rounds a corner ──────────────────────── */
+	--border-radius-xsmall:  0 !important;
+	--border-radius-small:   0 !important;
+	--border-radius-medium:  0 !important;
+	--border-radius-large:   0 !important;
+	--border-radius-xlarge:  0 !important;
+	--border-radius-xxlarge: 0 !important;
+
+	--focus-outline-color:   var(--n-accent) !important;
+	--color-accent-primary:  var(--n-accent) !important;
+
+	--sidebar-background-color: var(--n-crust) !important;
+	--sidebar-text-color:       var(--n-fg) !important;
+	--sidebar-border-color:     var(--n-line) !important;
+}
+
+/* a theme's header image would still paint over the strip colour */
+#navigator-toolbox {
+	background-image: none !important;
+	--lwt-header-image: none !important;
+	--lwt-additional-images: none !important;
+	border-bottom: 1px solid var(--n-line) !important;
+}
+
+/* ── tabs — background tabs dim, the selected one joins the toolbar and
+   carries the orange line, like the underline on GTK notebook tabs ──── */
+.tabbrowser-tab {
+	color: var(--n-dim) !important;
+}
+.tabbrowser-tab:hover { color: var(--n-fg) !important; }
+.tabbrowser-tab[selected],
+.tabbrowser-tab[multiselected] {
+	color: var(--n-fg) !important;
+}
+.tabbrowser-tab[selected] .tab-background {
+	box-shadow: inset 0 2px 0 var(--n-accent) !important;
+}
+.tabbrowser-tab[multiselected]:not([selected]) .tab-background {
+	box-shadow: inset 0 2px 0 color-mix(in srgb, var(--n-accent) 50%, transparent) !important;
+}
+
+/* ── toolbar buttons — waybar hover: orange fill, dark glyph ───────── */
+toolbarbutton:not([disabled]):hover,
+toolbarbutton:not([disabled]):hover > .toolbarbutton-icon,
+toolbarbutton:not([disabled]):hover > .toolbarbutton-badge-stack,
+toolbarbutton[open],
+toolbarbutton[checked] {
+	--toolbarbutton-icon-fill: var(--n-crust) !important;
+	color: var(--n-crust) !important;
+}
+
+/* window controls (minimise / maximise / close) — square, dim until
+   hovered, the same as the GTK headerbar buttons */
+.titlebar-button {
+	--toolbarbutton-icon-fill: var(--n-dim) !important;
+	color: var(--n-dim) !important;
+}
+.titlebar-button > .toolbarbutton-icon {
+	border-radius: 0 !important;
+	background-color: transparent !important;
+}
+.titlebar-button:hover > .toolbarbutton-icon {
+	background-color: var(--n-accent) !important;
+	--toolbarbutton-icon-fill: var(--n-crust) !important;
+	color: var(--n-crust) !important;
+}
+
+/* ── url bar ───────────────────────────────────────────────────────── */
+#urlbar[focused] .urlbar-input { font-style: italic; }
+#urlbar-background { box-shadow: none !important; }
+#urlbar[focused] > #urlbar-background,
+#urlbar[open] > #urlbar-background {
+	outline: none !important;
+	border: 1px solid var(--n-accent) !important;
+}
+#urlbar[open] > .urlbarView {
+	border-top: 1px solid var(--n-line) !important;
+}
+
+/* ── menus — wofi #entry:selected: orange fill, dark bold text ─────── */
+/* popup.css sets the radius on menupopup / panel themselves, so the
+   :root value alone never reaches them */
+menupopup,
+panel {
+	--panel-border-color: var(--n-accent) !important;
+	--panel-border-radius: 0 !important;
+}
+menupopup { --panel-padding: 2px !important; }
+
+/* menubar (Alt): the open menu takes the orange, not lwtheme's blue */
+menubar > menu[_moz-menuactive]:not([disabled]),
+menubar > menu[open] {
+	background-color: var(--n-accent) !important;
+	color: var(--n-crust) !important;
+}
+menupopup > menuitem,
+menupopup > menu {
+	border-radius: 0 !important;
+}
+menupopup > menuitem[_moz-menuactive],
+menupopup > menu[_moz-menuactive],
+menupopup > menu[open] {
+	background-color: var(--n-accent) !important;
+	color: var(--n-surface) !important;
+}
+menupopup > menuitem[disabled][_moz-menuactive] {
+	background-color: var(--n-line) !important;
+	color: var(--n-dim) !important;
+}
+
+/* hamburger / extensions panel rows */
+.subviewbutton:not([disabled]):hover,
+.subviewbutton:not([disabled])[open],
+.toolbarbutton-1.subviewbutton:not([disabled]):hover {
+	background-color: var(--n-accent) !important;
+	color: var(--n-crust) !important;
+}
+
+tooltip {
+	appearance: none !important;
+	background-color: var(--n-surface) !important;
+	color: var(--n-fg) !important;
+	border: 2px solid var(--n-accent) !important;
+	border-radius: 0 !important;
+}

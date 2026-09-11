@@ -370,10 +370,9 @@ done
 escape "$status"
 head_plain="${capacity}%  ·  $g_esc"
 
-# inner width: the block sits inside a 2-space indent, and the header, the
-# gauge and the rules are all centred on that inner span rather than on the
-# full row -- centring on the full row is what left the header a character
-# short of the gauge's left edge
+# block width: the header is centred on it, and the gauge and the rules run
+# its full length. No indent of its own -- tooltip > box pads both sides
+# evenly, and a leading indent only ever widened the left margin.
 inner=$(( lw + 2 + vw ))
 if [ ${#head_plain} -gt "$inner" ]; then
 	# a long status ("Discharging") makes the header the widest thing in the
@@ -395,7 +394,7 @@ pad=$(( (inner - ${#head_plain}) / 2 ))
 
 # only the status word takes the accent; the percentage stays on the
 # foreground colour so it reads as the headline figure
-tooltip="  $(printf '%*s' "$pad" '')<b>${capacity}%</b>$(paint "$C_DIM" '  ·  ')$(paint "$accent" "<b>$g_esc</b>")"
+tooltip="$(printf '%*s' "$pad" '')<b>${capacity}%</b>$(paint "$C_DIM" '  ·  ')$(paint "$accent" "<b>$g_esc</b>")"
 
 # capacity gauge, filled to the nearest cell
 bar_f=$(( capacity * inner / 100 ))
@@ -404,11 +403,11 @@ fill=""; rest=""
 for (( i = 0; i < inner; i++ )); do
 	if [ "$i" -lt "$bar_f" ]; then fill+="█"; else rest+="░"; fi
 done
-tooltip+="\n  $(paint "$accent" "$fill")$(paint "$C_DIM" "$rest")"
+tooltip+="\n$(paint "$accent" "$fill")$(paint "$C_DIM" "$rest")"
 
 rule=""
 for (( i = 0; i < inner; i++ )); do rule+="─"; done
-rule="\n  $(paint "$C_DIM" "$rule")"
+rule="\n$(paint "$C_DIM" "$rule")"
 
 # the rule after the live readings separates them from the figures that only
 # move over weeks; SPLIT is the index of the last live row
@@ -425,7 +424,7 @@ for i in "${!labels[@]}"; do
 	printf -v v '%*s'  "$vw" "${values[i]}"
 	escape "$l"; l=$g_esc
 	escape "$v"; v=$g_esc
-	tooltip+="\n  $(paint "$C_DIM" "$l")  $(paint "$C_FG" "<b>$v</b>")"
+	tooltip+="\n$(paint "$C_DIM" "$l")  $(paint "$C_FG" "<b>$v</b>")"
 	[ "$i" -eq "$split" ] && [ $(( i + 1 )) -lt ${#labels[@]} ] && tooltip+="$rule"
 done
 
