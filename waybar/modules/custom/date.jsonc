@@ -1,0 +1,29 @@
+{
+	/*--------------------------------
+	    date, with a month calendar
+	--------------------------------*/
+
+	// replaces the built-in "clock#date": waybar draws {calendar} itself and
+	// the only styling it takes is pango inside the calendar.format strings,
+	// which have to carry a literal hex colour -- and the theme switcher works
+	// by copying a file over current-theme.css, so a hardcoded accent there
+	// stops tracking the theme. see scripts/calendar.sh.
+	//
+	// the built-in's click cycled a year view; scrolling through months and
+	// clicking back to today is the trade.
+	//
+	// signal 10 is the next one free (1 = system_update, 7 = power-profile,
+	// 8 = caffeine, 9 = bluetooth); the nav subcommands raise it so the grid
+	// moves under the cursor rather than at the next poll.
+	"custom/date": {
+		"exec": "~/.config/waybar/scripts/calendar.sh",
+		"return-type": "json",
+		"interval": 60,
+		"signal": 10,
+		"on-click": "~/.config/waybar/scripts/calendar.sh today",
+		"on-scroll-up": "~/.config/waybar/scripts/calendar.sh prev",
+		"on-scroll-down": "~/.config/waybar/scripts/calendar.sh next",
+		"min-length": 8,
+		"max-length": 8
+	}
+}

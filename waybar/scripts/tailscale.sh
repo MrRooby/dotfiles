@@ -56,9 +56,9 @@ paint() {
 # whoever owns the device
 g_esc=""
 escape() {
-	local s=${1//&/&amp;}
-	s=${s//</&lt;}
-	s=${s//>/&gt;}
+	local s=${1//&/\&amp;}
+	s=${s//</\&lt;}
+	s=${s//>/\&gt;}
 	s=${s//\\/\\\\}
 	g_esc=${s//\"/\\\"}
 }

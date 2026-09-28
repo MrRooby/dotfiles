@@ -10,6 +10,7 @@ DEPS=(
   "bluez-tools"          # bluetoothctl
   "brightnessctl"
   "fzf"
+  "jq"                   # tailscale.sh and bluetooth.sh parse JSON with it
   "NetworkManager"       # nmcli
   "dnf-utils"            # dnf check-update
   "pipewire-pulseaudio"

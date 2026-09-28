@@ -54,9 +54,9 @@ degrees() {
 # kernel and are pasted straight into both
 g_esc=""
 escape() {
-	local s=${1//&/&amp;}
-	s=${s//</&lt;}
-	s=${s//>/&gt;}
+	local s=${1//&/\&amp;}
+	s=${s//</\&lt;}
+	s=${s//>/\&gt;}
 	s=${s//\\/\\\\}
 	g_esc=${s//\"/\\\"}
 }
@@ -484,7 +484,103 @@ else
 	rm -f "$alert_state" 2>/dev/null
 fi
 
+# ---- theme colours -------------------------------------------------------
+
+# Same lookup as battery.sh: pango only takes literal hex, so the palette is
+# read from current-theme.css and @references are followed until a hex falls
+# out. Anything unresolved paints nothing and inherits styles/tooltips.css.
+
+declare -A THEME=()
+theme_css="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/current-theme.css"
+if [ -r "$theme_css" ]; then
+	while read -r kw name val; do
+		[ "$kw" = "@define-color" ] || continue
+		THEME[$name]=${val%;}
+	done < "$theme_css"
+fi
+
+g_hex=""
+resolve() {
+	local v=${THEME[$1]:-} n=0
+	while [ -n "$v" ] && [ "${v:0:1}" = "@" ] && [ "$n" -lt 10 ]; do
+		v=${THEME[${v#@}]:-}
+		n=$(( n + 1 ))
+	done
+	if [[ $v =~ ^#[0-9a-fA-F]{3,8}$ ]]; then g_hex=$v; else g_hex=""; fi
+}
+
+resolve tooltip-dim; C_DIM=$g_hex
+resolve tooltip-fg;  C_FG=$g_hex
+resolve charging;    C_OK=$g_hex
+resolve warning;     C_WARM=$g_hex
+resolve tooltip-br;  C_HOT=$g_hex
+resolve critical;    C_CRIT=$g_hex
+
+# ---- the heat ramp -------------------------------------------------------
+
+# Three bands, and the whole bar takes the colour of the reading it is showing:
+# green while the sensor has headroom, yellow as it closes on its limit, red at
+# it. Same two lines cpu.sh and memory.sh draw, so a yellow bar means the same
+# thing everywhere.
+#
+# The position is always measured against the sensor's OWN threshold, never one
+# global temperature: 62 °C is idle on a CPU die and most of the way to the
+# limit on an NVMe controller.
+#
+# An earlier version graded each cell by its own position on the axis, which
+# left every bar green at the base whatever the reading was and put the colour
+# that mattered in a tip two pixels wide. Colour has to encode the value.
+g_ramp=""
+ramp() {   # ramp <permille of this sensor's limit>
+	if   [ "$1" -ge 900 ]; then g_ramp=$C_CRIT
+	elif [ "$1" -ge 750 ]; then g_ramp=$C_WARM
+	else                        g_ramp=$C_OK
+	fi
+}
+
+g_pm=0
+permille() {   # permille <milli-degrees> <threshold-milli>
+	if [ "$2" -le 0 ]; then g_pm=0; else g_pm=$(( $1 * 1000 / $2 )); fi
+	[ "$g_pm" -lt 0 ] && g_pm=0
+	[ "$g_pm" -gt 1000 ] && g_pm=1000
+}
+
+# ---- drawing -------------------------------------------------------------
+
+# Appending to a variable rather than returning through $( ) on purpose: this
+# runs every two seconds and a span per cell would be a fork per cell.
+g_out=""
+add() {   # add <colour> <markup>
+	if [ -n "$1" ]; then g_out+="<span foreground='$1'>$2</span>"; else g_out+="$2"; fi
+}
+
+# The fill is one colour -- the reading's -- against a dim trough. The tip
+# resolves to an eighth of a cell (U+2588..U+258F are the left-aligned block
+# eighths, so the partial is 0x2590 minus the remainder), because rounding to
+# whole cells made every cool sensor look identically empty.
+PARTIAL=("" "▏" "▎" "▍" "▌" "▋" "▊" "▉")
+
+meter() {   # meter <milli> <threshold-milli> <cells>
+	local v=$1 lim=$2 n=$3 e f r i run=""
+
+	if [ "$lim" -le 0 ]; then e=0; else e=$(( v * n * 8 / lim )); fi
+	[ "$e" -lt 0 ] && e=0
+	[ "$e" -gt $(( n * 8 )) ] && e=$(( n * 8 ))
+	f=$(( e / 8 )); r=$(( e % 8 ))
+
+	for (( i = 0; i < f; i++ )); do run+="█"; done
+	if [ "$r" -gt 0 ]; then run+="${PARTIAL[r]}"; f=$(( f + 1 )); fi
+	if [ -n "$run" ]; then permille "$v" "$lim"; ramp "$g_pm"; add "$g_ramp" "$run"; fi
+
+	run=""
+	for (( i = f; i < n; i++ )); do run+="░"; done
+	[ -n "$run" ] && add "$C_DIM" "$run"
+}
+
 # ---- tooltip -------------------------------------------------------------
+
+BAR_W=12
+VAL_W=5                                   # "-10.0" .. "100.0"
 
 # widest label, so the value column lines up across every group
 lw=0
@@ -492,56 +588,104 @@ for i in "${keep[@]}"; do
 	[ ${#labels[i]} -gt "$lw" ] && lw=${#labels[i]}
 done
 
-VAL_W=6                                   # "-10.0" .. "100.0"
-row_w=$(( 2 + lw + 2 + VAL_W + 5 ))       # indent + label + gap + value + " °C" + marker
+# The limit each group is drawn against, shown once on its heading instead of
+# repeated down every row -- it is what makes the bars mean anything. A group
+# whose sensors disagree about it says nothing rather than something wrong.
+declare -A glimit=()
 for i in "${keep[@]}"; do
-	[ ${#groups[i]} -gt "$row_w" ] && row_w=${#groups[i]}
+	# whole degrees here, unlike the readings: a drive declaring 89850 mC is
+	# saying "about 90", and "limit 89.9 °C" only reads as false precision
+	lim="limit $(( (thrs[i] + 500) / 1000 )) °C"
+	if [ -z "${glimit[${groups[i]}]+set}" ]; then
+		glimit[${groups[i]}]=$lim
+	elif [ "${glimit[${groups[i]}]}" != "$lim" ]; then
+		glimit[${groups[i]}]=""
+	fi
 done
 
-body=""
+# indent + label + gap + value + " °C" + gap + bar + marker
+width=$(( 3 + lw + 3 + VAL_W + 3 + 3 + BAR_W + 2 ))
+for i in "${keep[@]}"; do
+	n=$(( 1 + ${#groups[i]} + 3 + ${#glimit[${groups[i]}]} ))
+	[ "$n" -gt "$width" ] && width=$n
+done
+
+degrees "${millis[cpu]}"; cpu_f=$g_deg
+head_plain="$cpu_f °C  ·  ${groups[cpu]%% ·*}"
+[ ${#head_plain} -gt "$width" ] && width=${#head_plain}
+
+rule=""
+for (( i = 0; i < width; i++ )); do rule+="─"; done
+
+# the headline reading and its own meter, the same three-part opening
+# battery.sh uses
+pad=$(( (width - ${#head_plain}) / 2 ))
+[ "$pad" -lt 0 ] && pad=0
+escape "${groups[cpu]%% ·*}"
+permille "${millis[cpu]}" "${thrs[cpu]}"; ramp "$g_pm"
+
+g_out="$(printf '%*s' "$pad" '')"
+add "$g_ramp" "<b>$cpu_f °C</b>"
+add "$C_DIM" "  ·  "
+add "$C_HOT" "<b>$g_esc</b>"
+
+g_out+="\n"
+meter "${millis[cpu]}" "${thrs[cpu]}" "$width"
+g_out+="\n"
+add "$C_DIM" "$rule"
+
 last=""
-line=""
 for i in "${keep[@]}"; do
 	if [ "${groups[i]}" != "$last" ]; then
-		[ -n "$body" ] && body+="\n"
-		escape "${groups[i]}"
-		body+="<b>$g_esc</b>\n"
+		# a blank line before every group, including the first: the block was
+		# unreadable run together under one rule
+		g_out+="\n\n "
+
+		# "SSD · Lexar SSD NM620 1TB": the category carries the accent, the
+		# chip or model behind it stays dim
+		cat=${groups[i]%% · *}
+		detail=${groups[i]#"$cat"}
+		escape "$cat"
+		add "$C_HOT" "<b>$g_esc</b>"
+		if [ -n "$detail" ]; then
+			escape "$detail"
+			add "$C_DIM" "$g_esc"
+		fi
+
+		# the limit, pushed out to the right edge of the block
+		lim=${glimit[${groups[i]}]}
+		if [ -n "$lim" ]; then
+			pad=$(( width - 1 - ${#groups[i]} - ${#lim} ))
+			[ "$pad" -lt 3 ] && pad=3
+			g_out+="$(printf '%*s' "$pad" '')"
+			add "$C_DIM" "$lim"
+		fi
+
 		last=${groups[i]}
 	fi
 
 	degrees "${millis[i]}"
-	printf -v line '  %-*s  %*s °C' "$lw" "${labels[i]}" "$VAL_W" "$g_deg"
-	escape "$line"
-	body+="$g_esc"
+	permille "${millis[i]}" "${thrs[i]}"; ramp "$g_pm"
+	c=$g_ramp
 
-	# ▲ marks the hottest sensor, ! anything at or past its alert threshold —
+	printf -v l '%-*s' "$lw" "${labels[i]}"
+	escape "$l"
+	g_out+="\n   "
+	add "$C_DIM" "$g_esc"
+	g_out+="   "
+	add "$c" "<b>$(printf '%*s' "$VAL_W" "$g_deg") °C</b>"
+	g_out+="   "
+	meter "${millis[i]}" "${thrs[i]}" "$BAR_W"
+
+	# ▲ marks the hottest sensor, ! anything at or past its alert threshold --
 	# cheaper than spending a whole column on a number that never changes. Same
 	# threshold the notification uses, so the two always agree.
-	[ "$i" -eq "$hot" ] && body+=" ▲"
-	[ "${millis[i]}" -ge "${thrs[i]}" ] && body+=" <b>!</b>"
-	body+="\n"
+	if [ "${millis[i]}" -ge "${thrs[i]}" ]; then
+		add "$C_CRIT" " <b>!</b>"
+	elif [ "$i" -eq "$hot" ]; then
+		add "$C_HOT" " ▲"
+	fi
 done
 
-# centre a plain string over the body block
-pad_for() {
-	local n=$(( (row_w - ${#1}) / 2 ))
-	[ "$n" -lt 0 ] && n=0
-	printf -v g_pad '%*s' "$n" ''
-}
-
-degrees "${millis[cpu]}"; cpu_f=$g_deg
-degrees "${millis[hot]}"; hot_f=$g_deg
-
-# "SSD · Lexar…" -> "SSD": the ▲ in the body pinpoints the sensor, so the
-# header only needs the category and stays narrower than the grid
-plain1="CPU $cpu_f °C"
-plain2="peak ${groups[hot]%% ·*} $hot_f °C"
-
-pad_for "$plain1"; escape "$plain1"
-tooltip="$g_pad<b>$g_esc</b>\n"
-pad_for "$plain2"; escape "$plain2"
-tooltip+="$g_pad$g_esc\n\n"
-tooltip+="${body%\\n}"
-
 printf '{"text":"%s %d°C","class":"%s","tooltip":"%s"}\n' \
-	"$icon" "$cpu_c" "$class" "$tooltip"
+	"$icon" "$cpu_c" "$class" "$g_out"

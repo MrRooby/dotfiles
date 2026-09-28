@@ -62,7 +62,6 @@
 	--thumbnail-fg-color:        #d8cab8;
 	--window-radius:             0;
 	--border-color:              #2b2f3d;
-	--monospace-font-family:     "JetBrainsMono Nerd Font";
 }
 
 
@@ -76,8 +75,6 @@
 window.background {
 	background-color: @n_surface;
 	color: @n_fg;
-	font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
-	font-size: 10pt;
 	border: none;
 }
 window.csd { box-shadow: none; }

@@ -1,8 +1,8 @@
 #custom-trigger:hover,
 #idle_inhibitor:hover,
-#clock.date:hover,
+#custom-date:hover,
 #network:hover,
-#bluetooth:hover,
+#custom-bluetooth:hover,
 #custom-system_update:hover,
 #mpris:hover,
 #pulseaudio:hover,
@@ -19,7 +19,7 @@
 	color: @hover-fg;
 }
 
-#memory.warning,
+#custom-memory.warning,
 #custom-cpu.warning,
 #custom-temperature.warning,
 #custom-battery.warning {
@@ -27,7 +27,7 @@
 }
 
 #custom-temperature.critical,
-#memory.critical,
+#custom-memory.critical,
 #custom-cpu.critical,
 #custom-battery.critical {
 	color: @critical;

@@ -1,0 +1,21 @@
+{
+	/*----------------------------------------
+	    memory, with the full accounting
+	----------------------------------------*/
+
+	// replaces the built-in "memory" module: that one interpolates {used},
+	// {total}, {percentage} and {swapUsed} into one flat format string, so it
+	// cannot split the total into anonymous and cache, and cannot say anything
+	// about how the swap is backed -- which on a machine swapping to zram is
+	// the figure that matters. see scripts/memory.sh.
+	//
+	// interval 5 rather than the built-in's 10: /proc/meminfo is two file
+	// reads and memory moves faster than that under the cursor.
+	"custom/memory": {
+		"exec": "~/.config/waybar/scripts/memory.sh",
+		"return-type": "json",
+		"interval": 5,
+		"min-length": 7,
+		"max-length": 7
+	}
+}

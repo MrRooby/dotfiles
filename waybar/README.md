@@ -50,20 +50,20 @@ itself; the rest are Waybar built-ins with a local config.
 | `sway/workspaces` | numbered workspaces | — | scroll switches | |
 | `sway/window` | focused window title | — | | |
 | `custom/fan` | fan RPM | — | | [`fan.sh`](./scripts/fan.sh) |
-| `custom/temperature` | CPU °C | every hwmon chip and thermal zone | | [`temperature.sh`](./scripts/temperature.sh) |
-| `custom/cpu` | power-profile icon + total % | per-thread usage and clock grid | | [`cpu.sh`](./scripts/cpu.sh) |
+| `custom/temperature` | CPU °C | every hwmon chip and thermal zone, each against its own limit | | [`temperature.sh`](./scripts/temperature.sh) |
+| `custom/cpu` | power-profile icon + total % | per-thread load bars and clocks, load average, package watts | | [`cpu.sh`](./scripts/cpu.sh) |
 | `clock#time` | 24h clock | 12h clock | click cycles the mode | |
-| `clock#date` | date | month calendar | | |
-| `memory` | RAM % | used / total | | |
+| `custom/date` | date | month calendar, ISO week, day of year | scroll changes month, click returns to today | [`calendar.sh`](./scripts/calendar.sh) |
+| `custom/memory` | RAM % | **the apps/cache split, commit headroom, pressure, and how the swap is backed** | | [`memory.sh`](./scripts/memory.sh) |
 | `network` | Wi-Fi strength icon | SSID, address, strength, band | click toggles an `impala` popup | |
-| `bluetooth` | adapter state icon | **every connected device with its battery %** | click opens `bluetui`, right-click powers off | |
+| `custom/bluetooth` | adapter state icon | **every device bluez knows: battery, link, and the negotiated audio codec** | click opens `bluetui`, right-click powers off | [`bluetooth.sh`](./scripts/bluetooth.sh) |
 | `custom/hotspot` | 󱂇 / 󰠅 | NetworkManager hotspot state | click toggles | [`hotspot.sh`](./scripts/hotspot.sh) |
 | `custom/tailscale` | 󰦝 / 󰦞 | tailnet address, logged out, or off | click toggles | [`tailscale.sh`](./scripts/tailscale.sh) |
-| `custom/caffeine` | 󰅶 / 󰛉 | lid, sleep and idle inhibit state | click toggles | [`caffeine.sh`](./scripts/caffeine.sh) |
+| `custom/caffeine` | 󰅶 / 󰛉 | uptime, how long it has been held, what is inhibited | click toggles | [`caffeine.sh`](./scripts/caffeine.sh) |
 | `mpris` | now playing | player and track | click play/pauses, middle previous, right next | |
 | `group/pulseaudio` | volume; hover reveals the mic | device and level | click mutes, scroll adjusts | [`volume.sh`](./scripts/volume.sh) |
 | `backlight` | brightness % | level | scroll adjusts | [`backlight.sh`](./scripts/backlight.sh) |
-| `custom/keyboard` | split-keyboard battery | keyboard battery over Bluetooth | click opens the power panel | [`corne.sh`](./scripts/corne.sh) |
+| `custom/keyboard` | split-keyboard battery, lower half | both halves, with gauges | click opens the power panel | [`corne.sh`](./scripts/corne.sh) |
 | `group/battery_profile` | battery %; hover reveals three TLP buttons | gauge, watts, %/h, time left, charger, health, cycles | click a button to switch profile | [`battery.sh`](./scripts/battery.sh), [`power-profile.sh`](./scripts/power-profile.sh) |
 
 <details>
@@ -100,31 +100,35 @@ modules means renumbering the dividers around them.
 
 ## Tooltips
 
-The reason nine modules are script-backed: Waybar's `tooltip-format` takes one
+The reason twelve modules are script-backed: Waybar's `tooltip-format` takes one
 flat format string, so anything needing a grid, a gauge or a computed rate has
 to be a `custom/` module that renders its own Pango markup.
 
 <p align="center">
-<img alt="battery tooltip" src="./assets/tooltip-battery.png" height="200">
+<img alt="cpu tooltip" src="./assets/tooltip-cpu.png" height="230">
 &nbsp;&nbsp;
-<img alt="cpu tooltip" src="./assets/tooltip-cpu.png" height="145">
+<img alt="memory tooltip" src="./assets/tooltip-memory.png" height="230">
+&nbsp;&nbsp;
+<img alt="calendar tooltip" src="./assets/tooltip-calendar.png" height="230">
 </p>
 
 <p align="center">
-<img alt="bluetooth tooltip" src="./assets/tooltip-bluetooth.png" height="58">
+<img alt="bluetooth tooltip" src="./assets/tooltip-bluetooth.png" height="190">
 &nbsp;&nbsp;
-<img alt="caffeine tooltip" src="./assets/tooltip-caffeine.png" height="58">
+<img alt="battery tooltip" src="./assets/tooltip-battery.png" height="120">
+&nbsp;&nbsp;
+<img alt="caffeine tooltip" src="./assets/tooltip-caffeine.png" height="95">
 </p>
 
 <p align="center">
-<sub>battery · CPU · bluetooth · caffeine</sub>
+<sub>CPU · memory · calendar · bluetooth · battery · caffeine</sub>
 </p>
 
 <details>
-<summary>Temperature — every sensor the kernel exposes</summary>
+<summary>Temperature — every sensor, each against its own limit</summary>
 
 <p align="center">
-<img alt="temperature tooltip" src="./assets/tooltip-temperature.png" height="480">
+<img alt="temperature tooltip" src="./assets/tooltip-temperature.png" height="360">
 </p>
 
 </details>
@@ -149,11 +153,13 @@ inverted, the same treatment `#entry:selected` gets in wofi.
 | --- | --- |
 | **Tooltips that appear on hover** | GTK3 waits 500 ms and has no setting for it. [`tools/fast-tooltip.c`](./tools/fast-tooltip.c) interposes the timer and gets it down to ~70 ms. Measured, not guessed — see [Known issues](#known-issues) for the caveat. |
 | **Battery detail** | Charge rate in watts and %/h, time to full or empty, the charger's real USB-PD contract, charge limit, health and cycle count. |
-| **Per-thread CPU** | Usage and clock for every thread in a two-column grid, with load average and package watts. |
-| **All sensors, discovered** | [`temperature.sh`](./scripts/temperature.sh) walks hwmon and the thermal zones at runtime and learns which pairs are the same physical sensor, because hwmon indices are not stable across boots. |
-| **Bluetooth device batteries** | Not just the adapter icon — every connected device with its percentage. |
+| **Per-thread CPU** | A graded load meter, usage and clock for every thread in a two-column grid, with load average, average and peak clock, and package watts. |
+| **All sensors, discovered** | [`temperature.sh`](./scripts/temperature.sh) walks hwmon and the thermal zones at runtime and learns which pairs are the same physical sensor, because hwmon indices are not stable across boots. Each one is drawn against *its own* limit, so 62 °C reads as idle on a CPU die and nearly hot on an NVMe controller. |
+| **Swap, honestly** | On a machine swapping to zram, "1.4 GiB of swap used" hides the interesting part. [`memory.sh`](./scripts/memory.sh) asks the device what it holds: the uncompressed size, the RAM the allocator actually took for it, the ratio between them and the algorithm — RAM that is already counted against you in the used figure above. |
+| **Bluetooth, in full** | Not just the adapter icon — every device bluez knows, with its battery, whether the link is LE or BR/EDR, and for a headset the codec it actually negotiated, decoded from the A2DP configuration blob: sample rate, channel mode, bitrate and absolute volume. |
 | **Sleep inhibit** | One click keeps the machine awake with the lid shut, including the lock screen. |
-| **Theme-aware tooltips** | [`battery.sh`](./scripts/battery.sh) parses `current-theme.css`, follows `@define-color` chains to a hex and emits Pango spans, so tooltip accents track the active theme instead of being hardcoded. |
+| **Meters that mean something** | Every bar takes the colour of the value it is showing — green while there is room, yellow once it is working, red at the limit — on the same two lines `states.css` uses to colour the module in the bar. Temperature measures each sensor against *its own* limit, so 62 °C reads as idle on a CPU die and nearly hot on an NVMe controller. Tips resolve to an eighth of a cell, so a 12% thread is visible. |
+| **Theme-aware tooltips** | Every script-backed tooltip parses `current-theme.css`, follows `@define-color` chains to a hex and emits Pango spans, so accents, gauges and warning colours track the active theme instead of being hardcoded. It is also why the calendar is a script: Waybar draws `{calendar}` itself and its format strings only take literal hex. |
 | **Fedora installer** | Upstream's is Arch. |
 
 One more that is easy to miss: `"locale": ""` in
@@ -373,14 +379,17 @@ nf-md battery charging
 | [`temperature.sh`](./scripts/temperature.sh) | temperature module and its tooltip |
 | [`caffeine.sh`](./scripts/caffeine.sh) | sleep inhibitor, and the sway lid binding |
 | [`fan.sh`](./scripts/fan.sh) | ThinkPad fan RPM |
-| [`corne.sh`](./scripts/corne.sh) | split-keyboard battery over UPower |
+| [`corne.sh`](./scripts/corne.sh) | split-keyboard battery, both halves over BlueZ |
 | [`hotspot.sh`](./scripts/hotspot.sh) | NetworkManager hotspot toggle |
 | [`tailscale.sh`](./scripts/tailscale.sh) | Tailscale toggle |
+| [`calendar.sh`](./scripts/calendar.sh) | date, and a month grid you can scroll |
+| [`memory.sh`](./scripts/memory.sh) | RAM, swap and commit accounting |
+| [`bluetooth.sh`](./scripts/bluetooth.sh) | Bluetooth adapter state and device detail |
 | [`power-profile.sh`](./scripts/power-profile.sh) | TLP profile drawer |
 | [`volume.sh`](./scripts/volume.sh) | volume and mute, with notifications |
 | [`backlight.sh`](./scripts/backlight.sh) | brightness, with notifications |
 | [`network.sh`](./scripts/network.sh) | fzf Wi-Fi picker |
-| [`bluetooth.sh`](./scripts/bluetooth.sh) | fzf Bluetooth picker |
+| [`bluetooth-picker.sh`](./scripts/bluetooth-picker.sh) | fzf Bluetooth picker |
 | [`power-menu.sh`](./scripts/power-menu.sh) | fzf power menu |
 | [`system-update.sh`](./scripts/system-update.sh) | update checker — Arch-only, see below |
 | [`fzf-colorizer.sh`](./scripts/fzf-colorizer.sh) | syncs fzf colours to the theme |
@@ -396,7 +405,8 @@ Built for one laptop — a ThinkPad with an Intel i5-8250U running Fedora and
 Sway. These are the places that shows.
 
 - **Hardcoded device identity.** [`corne.sh`](./scripts/corne.sh) has a
-  Bluetooth MAC baked into its UPower path, and
+  Bluetooth MAC baked into its BlueZ path, plus the GATT handle of the right
+  half's battery characteristic, and
   [`hotspot.sh`](./scripts/hotspot.sh) a specific NetworkManager profile name,
   matched with an unanchored `grep`. Both need editing for another machine.
 - **`custom/cpu` shows `pkg n/a`.** Package wattage is read from amdgpu's PPT
@@ -407,9 +417,11 @@ Sway. These are the places that shows.
   the source name GTK gives it, `[gtk+] tooltip_popup_timeout`. If a future
   GTK renames it, nothing matches, the call passes through untouched, and
   tooltips go back to 500 ms. Nothing breaks — they just get slow again.
-- **Bluetooth battery needs the device to expose it.** Waybar reads
+- **Bluetooth battery needs the device to expose it.** The module reads
   `org.bluez.Battery1`; devices that do not implement it list without a
-  percentage.
+  percentage. The codec line is likewise only there while an
+  `org.bluez.MediaTransport1` exists, which means while an audio profile is
+  actually connected.
 - **Caffeine keeps the machine awake with the lid shut.** That is the point,
   but it will run warm in a bag. It does not survive a reboot.
 - **Caffeine needs the sway lid binding** above to suppress the lock screen,

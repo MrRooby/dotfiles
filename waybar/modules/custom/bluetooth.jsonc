@@ -1,0 +1,30 @@
+{
+	/*------------------------------------------
+	    bluetooth: adapter state, device tooltip
+	------------------------------------------*/
+
+	// replaces the built-in "bluetooth" module: its tooltip can only paste
+	// {device_alias}, {device_address} and {device_battery_percentage} into a
+	// fixed enumerate format, so there is no way to align columns, colour a
+	// row by its state, list devices that are paired but not connected, or say
+	// which codec a headset actually negotiated. see scripts/bluetooth.sh.
+	//
+	// interval 3 rather than tailscale's 5: bluetooth state changes are
+	// user-driven (a headset powered on, a click in bluetui) and a five second
+	// wait after one is long enough to feel broken. the poll is one D-Bus
+	// round trip and one jq.
+	//
+	// signal 9 is the next one free (1 = system_update, 7 = power-profile,
+	// 8 = caffeine); the right-click raises it so the icon flips immediately
+	// rather than at the next poll.
+	"custom/bluetooth": {
+		"exec": "~/.config/waybar/scripts/bluetooth.sh",
+		"return-type": "json",
+		"interval": 3,
+		"signal": 9,
+		"on-click": "kitty --class bluetui-popup -o background_opacity=1.0 -e bluetui",
+		"on-click-right": "bluetoothctl power off && notify-send 'Bluetooth Off' -i 'network-bluetooth-inactive' -h string:x-canonical-private-synchronous:bluetooth && pkill -RTMIN+9 waybar",
+		"min-length": 2,
+		"max-length": 2
+	}
+}

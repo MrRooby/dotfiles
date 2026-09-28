@@ -32,10 +32,10 @@ tooltip label {
 /* month header + today marker pick up the accent,
    the grid stays on the warm foreground */
 
-#clock.date tooltip > box {
+#custom-date tooltip > box {
 	padding: 8px 12px;
 }
 
-#clock.date tooltip label {
+#custom-date tooltip label {
 	font-size: 13px;
 }

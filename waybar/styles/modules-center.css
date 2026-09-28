@@ -28,7 +28,7 @@
 	background-color: @temperature;
 	color: @memory;
 }
-#memory {
+#custom-memory {
 	background-color: @memory;
   color: @dirty-orange;
 }
@@ -94,7 +94,7 @@
     date
 ----------*/
 
-#clock.date {
+#custom-date {
 	padding-left: 6px;
   color: @dirty-orange;
 	background-color: @cpu;
@@ -113,7 +113,7 @@
 	background-color: @tray;
 	padding: 0 6px 0 4px;
 }
-#bluetooth {
+#custom-bluetooth {
   color: @dirty-orange;
 	background-color: @tray;
 	padding: 0 5px;

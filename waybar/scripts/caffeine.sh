@@ -119,8 +119,119 @@ if [ "${1:-}" = "toggle" ]; then
 	pkill -RTMIN+$SIGNAL waybar 2>/dev/null
 fi
 
-if holder >/dev/null; then
-	printf '{"text":"󰅶","class":"active","tooltip":"Caffeine: on\\nlid close, sleep and idle inhibited"}\n'
-else
-	printf '{"text":"󰛉","class":"inactive","tooltip":"Caffeine: off"}\n'
+# ---- theme colours -------------------------------------------------------
+
+# Same lookup as battery.sh: pango only takes literal hex, so the palette is
+# read from current-theme.css and @references are followed until a hex falls
+# out. Anything unresolved paints nothing and inherits styles/tooltips.css.
+
+declare -A THEME=()
+theme_css="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/current-theme.css"
+if [ -r "$theme_css" ]; then
+	while read -r kw name val; do
+		[ "$kw" = "@define-color" ] || continue
+		THEME[$name]=${val%;}
+	done < "$theme_css"
 fi
+
+g_hex=""
+resolve() {
+	local v=${THEME[$1]:-} n=0
+	while [ -n "$v" ] && [ "${v:0:1}" = "@" ] && [ "$n" -lt 10 ]; do
+		v=${THEME[${v#@}]:-}
+		n=$(( n + 1 ))
+	done
+	if [[ $v =~ ^#[0-9a-fA-F]{3,8}$ ]]; then g_hex=$v; else g_hex=""; fi
+}
+
+resolve tooltip-dim; C_DIM=$g_hex
+resolve tooltip-fg;  C_FG=$g_hex
+resolve tooltip-br;  C_ACCENT=$g_hex
+resolve charging;    C_ON=$g_hex
+
+paint() {
+	if [ -n "$1" ]; then
+		printf "<span foreground='%s'>%s</span>" "$1" "$2"
+	else
+		printf '%s' "$2"
+	fi
+}
+
+# ---- tooltip -------------------------------------------------------------
+
+# "41min", "9h 10min", "3d 4h" -- the coarser unit is dropped once the finer
+# one stops being the thing you are reading.
+fmt_dur() {
+	local s=$1
+	if   [ "$s" -lt 60 ];    then printf '%ds' "$s"
+	elif [ "$s" -lt 3600 ];  then printf '%dmin' $(( s / 60 ))
+	elif [ "$s" -lt 86400 ]; then printf '%dh %dmin' $(( s / 3600 )) $(( s % 3600 / 60 ))
+	else                          printf '%dd %dh' $(( s / 86400 )) $(( s % 86400 / 3600 ))
+	fi
+}
+
+# How long the inhibitor has been held, from the holder's start time. Field 22
+# of /proc/<pid>/stat is in USER_HZ, which is 100 on every Linux architecture
+# this runs on regardless of the kernel's own HZ, so no getconf spawn.
+held_for() {
+	local pid=$1 rest start up
+	[ -r "/proc/$pid/stat" ] || return 1
+	read -r rest < "/proc/$pid/stat" || return 1
+
+	# comm is parenthesised and may contain spaces and ')', so cut after the
+	# last one rather than splitting from the left
+	rest=${rest##*') '}
+	# shellcheck disable=SC2086
+	set -- $rest
+	start=${20:-}
+	[[ $start =~ ^[0-9]+$ ]] || return 1
+
+	read -r up _ < /proc/uptime
+	up=${up%.*}
+	printf '%s' $(( up - start / 100 ))
+}
+
+# label/value rows in the same shape battery.sh uses: dim label, bright value,
+# both padded to the widest of each so the two columns line up
+labels=(); values=()
+row() { labels+=("$1"); values+=("$2"); }
+
+read -r uptime _ < /proc/uptime
+row "Uptime" "$(fmt_dur "${uptime%.*}")"
+
+if pid=$(holder); then
+	state="on"; accent=$C_ON; icon="󰅶"; class="active"
+	if secs=$(held_for "$pid"); then row "Held for" "$(fmt_dur "$secs")"; fi
+	# WHAT is logind's own vocabulary; the tooltip names the switches the way
+	# someone reaching for the module thinks of them
+	inhibits=${WHAT//handle-lid-switch/lid}
+	inhibits=${inhibits//handle-suspend-key/power key}
+	row "Inhibits" "${inhibits//:/ · }"
+else
+	state="off"; accent=$C_DIM; icon="󰛉"; class="inactive"
+fi
+
+lw=0; vw=0
+for i in "${!labels[@]}"; do
+	[ ${#labels[i]} -gt "$lw" ] && lw=${#labels[i]}
+	[ ${#values[i]} -gt "$vw" ] && vw=${#values[i]}
+done
+
+head_plain="Caffeine  ·  $state"
+inner=$(( lw + 2 + vw ))
+[ ${#head_plain} -gt "$inner" ] && inner=${#head_plain}
+
+pad=$(( (inner - ${#head_plain}) / 2 ))
+[ "$pad" -lt 0 ] && pad=0
+tooltip="$(printf '%*s' "$pad" '')<b>Caffeine</b>$(paint "$C_DIM" '  ·  ')$(paint "$accent" "<b>$state</b>")"
+
+rule=""
+for (( i = 0; i < inner; i++ )); do rule+="─"; done
+tooltip+="\n$(paint "$C_DIM" "$rule")"
+
+for i in "${!labels[@]}"; do
+	printf -v l '%-*s' "$lw" "${labels[i]}"
+	tooltip+="\n$(paint "$C_DIM" "$l")  $(paint "$C_FG" "<b>${values[i]}</b>")"
+done
+
+printf '{"text":"%s","class":"%s","tooltip":"%s"}\n' "$icon" "$class" "$tooltip"
