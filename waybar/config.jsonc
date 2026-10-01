@@ -36,7 +36,7 @@
         "custom/right_div#3",
         "custom/memory",
         "custom/right_div#4",
-        "network",
+        "custom/network",
         "custom/bluetooth",
         "custom/hotspot",
         "custom/tailscale",

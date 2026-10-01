@@ -26,6 +26,11 @@ set $env QT_QPA_PLATFORMTHEME qt6ct
 # Screen timeout lock and turn off display
 exec hypridle
 
+# Half-Life sounds for the charger, USB devices and monitors going in or out,
+# a fingerprint match, a wrong fingerprint or password and powering off; the
+# lock sound comes from lock.sh
+exec ~/.config/sway/scripts/event-sounds.sh
+
 # Google Drive sync
 exec rclone mount gdrive: ~/GoogleDrive --vfs-cache-mode full &
 
@@ -47,7 +52,7 @@ bindsym $mainMod+d exec wofi --show drun
 bindsym $mainMod+q kill
 
 # Lock screen replacement 
-bindsym $mainMod+Shift+l exec hyprlock
+bindsym $mainMod+Shift+l exec ~/.config/sway/scripts/lock.sh
 
 # Floating / Fullscreen matching Hyprland layout rules
 bindsym $mainMod+Shift+space floating toggle
@@ -201,8 +206,8 @@ for_window [app_id="nemo"]                   floating enable, move position cent
 for_window [app_id="xdg-desktop-portal-gtk"] floating enable, move position center, resize set 800 600
 for_window [app_id="org.gnome.FileRoller"]   floating enable, move position center, resize set 700 500
 for_window [app_id="zenity"]   floating enable, move position center, resize set 700 500
-for_window [class="bluetui-popup"]           floating enable, border pixel 2, resize set 700 700, move absolute position 610 30
-for_window [class="impala-popup"]            floating enable, border pixel 2, resize set 700 700, move absolute position 610 30
+for_window [class="bluetui-popup"]           floating enable, border pixel 2, resize set 700 700
+for_window [class="impala-popup"]            floating enable, border pixel 2, resize set 700 700
 for_window [app_id="org.telegram.desktop"]   floating enable, border pixel 2, resize set 900 700, move absolute position 610 30
 for_window [app_id="wdisplays"]              floating enable, resize set 900 600, move position center
 for_window [app_id="org.gnome.Loupe"]        floating enable, resize set 800 600, move position center

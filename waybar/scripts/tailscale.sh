@@ -42,7 +42,7 @@ resolve() {
 resolve tooltip-dim; C_DIM=$g_hex
 resolve tooltip-fg;  C_FG=$g_hex
 resolve tooltip-br;  C_ACCENT=$g_hex
-resolve charging;    C_ONLINE=$g_hex
+resolve tooltip-ok;  C_ONLINE=$g_hex
 
 paint() {
 	if [ -n "$1" ]; then

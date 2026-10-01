@@ -172,7 +172,7 @@ resolve() {
 
 resolve tooltip-dim; C_DIM=$g_hex
 resolve tooltip-fg;  C_FG=$g_hex
-resolve charging;    C_OK=$g_hex
+resolve tooltip-ok;  C_OK=$g_hex
 resolve warning;     C_WARM=$g_hex
 resolve tooltip-br;  C_HOT=$g_hex
 resolve critical;    C_CRIT=$g_hex

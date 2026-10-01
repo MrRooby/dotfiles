@@ -108,7 +108,7 @@
     system tray
 -----------------*/
 
-#network {
+#custom-network {
   color: @dirty-orange;
 	background-color: @tray;
 	padding: 0 6px 0 4px;

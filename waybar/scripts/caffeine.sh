@@ -111,6 +111,9 @@ stop() {
 # command sway execs. exec so no shell lingers behind hyprlock.
 if [ "${1:-}" = "lid" ]; then
 	holder >/dev/null && exit 0
+	# lock.sh plays the lock sound on its way to hyprlock; it lives with the
+	# sway config, so fall back to hyprlock itself where that is not installed
+	[ -x ~/.config/sway/scripts/lock.sh ] && exec ~/.config/sway/scripts/lock.sh
 	exec hyprlock
 fi
 
@@ -147,7 +150,7 @@ resolve() {
 resolve tooltip-dim; C_DIM=$g_hex
 resolve tooltip-fg;  C_FG=$g_hex
 resolve tooltip-br;  C_ACCENT=$g_hex
-resolve charging;    C_ON=$g_hex
+resolve tooltip-ok;  C_ON=$g_hex
 
 paint() {
 	if [ -n "$1" ]; then

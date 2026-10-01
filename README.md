@@ -10,7 +10,7 @@ git clone https://github.com/MrRooby/dotfiles.git ~/dotfiles
 cd ~/dotfiles && ./bootstrap.sh --dry-run && ./bootstrap.sh
 ```
 
-**Palette** — `#11111b` bar · `#232634` windows · `#d8cab8` text · `#9b9b9b` dim · `#CE6B29` accent
+**Palette** — `#11111b` bar · `#181825` windows · `#d8cab8` text · `#9b9b9b` dim · `#CE6B29` accent
 
 ---
 
@@ -59,12 +59,27 @@ mako, bottom-right.
 
 ![notification](screenshots/notification.png)
 
+## Claude Code status line
+
+Model, repo and branch on top; the 5-hour limit and the context window as
+bars underneath — green, then yellow from 70%, red from 90%.
+
+![claude code status line](screenshots/claude-statusline.png)
+
+Bootstrap copies `claude/statusline.sh` to `~/.claude/`; point Claude Code at it
+in `~/.claude/settings.json`:
+
+```json
+"statusLine": { "type": "command", "command": "~/.claude/statusline.sh", "refreshInterval": 2 }
+```
+
 ## Also
 
 - **sway** — no gaps, 2px borders, autotiling
 - **kitty** — JetBrainsMono Nerd Font
 - **ly** — TTY login
 - **hyprlock + hypridle** — lock and idle
+- **event sounds** — Half-Life effects for the charger, USB devices and monitors going in or out, a fingerprint match, a wrong fingerprint or password, locking and powering off
 - **nostromo** icons, **retro-cursor** cursors, Kvantum for Qt
 - **keyd** — keyboard remapping
 
@@ -104,7 +119,7 @@ All of them can be filtered: `--only configs,themes` or `--skip packages,fonts`.
 | Stage | What happens |
 |---|---|
 | `repos` | enables the COPRs in `packages/copr.txt` (keyd, Hyprland-Fedora) |
-| `packages` | `dnf install` of the 44 packages in `packages/dnf.txt` |
+| `packages` | `dnf install` of the 45 packages in `packages/dnf.txt` |
 | `fonts` | downloads JetBrainsMono Nerd Font from GitHub into `~/.local/share/fonts` |
 | `autotiling` | `pip install --user autotiling` |
 | `configs` | copies configs into `~/.config`, and the Firefox files into the default profile |
@@ -131,6 +146,7 @@ gtk-3.0/              nostromo theme for every GTK3 app (gtk.css) + settings.ini
 gtk-4.0/              nostromo theme for every GTK4 / libadwaita app + settings.ini
 qt6ct/  Kvantum/
 firefox/              userChrome.css + user.js, installed into the default profile
+claude/               status line script for Claude Code
 
 icons/nostromo/       icon theme (orange folders)
 icons/retro-cursor/   cursors + 120 X11/CSS name aliases

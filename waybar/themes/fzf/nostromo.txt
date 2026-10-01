@@ -1,5 +1,5 @@
 current-bg  surface0
-bg          base
+bg          crust
 spinner     rosewater
 hl          red
 fg          text

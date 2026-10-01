@@ -27,6 +27,7 @@ gnome-keyring
 # --- audio ---
 pipewire
 pipewire-pulseaudio
+pipewire-utils
 wireplumber
 pavucontrol
 

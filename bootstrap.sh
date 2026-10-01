@@ -178,6 +178,13 @@ if has_stage configs; then
     [[ -d "$REPO/nvim" ]] && install_to "$REPO/nvim" "$HOME/.config/nvim"
     [[ -f "$REPO/zshrc" ]] && install_to "$REPO/zshrc" "$HOME/.zshrc"
 
+    # claude code: the script only draws once settings.json points at it
+    if [[ -f "$REPO/claude/statusline.sh" ]]; then
+        install_to "$REPO/claude/statusline.sh" "$HOME/.claude/statusline.sh"
+        grep -qs 'statusline.sh' "$HOME/.claude/settings.json" \
+            || warn "claude: add the statusLine block from the README to ~/.claude/settings.json"
+    fi
+
     # firefox: the profile directory is named at random per machine (and
     # new installs keep it under ~/.config/mozilla rather than ~/.mozilla),
     # so the default profile is looked up in profiles.ini, not hard-coded

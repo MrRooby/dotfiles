@@ -311,7 +311,7 @@ fi
 # current-theme.css and the theme switcher rewrites that file, so the colours
 # are read from it at runtime rather than baked in here.
 #
-# Entries chain -- charging -> green -> #a6e3a1 -- so references are followed
+# Entries chain -- warning -> yellow -> #f9e2af -- so references are followed
 # until a hex falls out. Anything ending at a GTK function (alpha(), shade())
 # resolves to nothing, and paint() then emits the text unwrapped so it inherits
 # whatever styles/tooltips.css set. That is the same fallback used when the
@@ -340,7 +340,7 @@ resolve() {
 resolve tooltip-dim; C_DIM=$g_hex
 resolve tooltip-fg;  C_FG=$g_hex
 resolve tooltip-br;  C_ACCENT=$g_hex
-resolve charging;    C_CHARGING=$g_hex
+resolve tooltip-ok;  C_CHARGING=$g_hex
 resolve warning;     C_WARNING=$g_hex
 resolve critical;    C_CRITICAL=$g_hex
 

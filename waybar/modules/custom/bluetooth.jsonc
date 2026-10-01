@@ -22,7 +22,7 @@
 		"return-type": "json",
 		"interval": 3,
 		"signal": 9,
-		"on-click": "kitty --class bluetui-popup -o background_opacity=1.0 -e bluetui",
+		"on-click": "~/.config/waybar/scripts/popup.sh bluetui-popup bluetui",
 		"on-click-right": "bluetoothctl power off && notify-send 'Bluetooth Off' -i 'network-bluetooth-inactive' -h string:x-canonical-private-synchronous:bluetooth && pkill -RTMIN+9 waybar",
 		"min-length": 2,
 		"max-length": 2

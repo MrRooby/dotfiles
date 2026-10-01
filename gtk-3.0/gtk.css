@@ -17,12 +17,12 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 @define-color n_crust   #11111b;   /* waybar @crust — darkest chrome  */
-@define-color n_surface #232634;   /* @dirty-background — content     */
+@define-color n_surface #181825;   /* waybar @mantle — content, one step above the chrome */
 @define-color n_fg      #d8cab8;   /* @dirty-fg                       */
 @define-color n_dim     #9b9b9b;   /* @dirty-dim                      */
 @define-color n_accent  #CE6B29;   /* @dirty-orange                   */
 @define-color n_red     #C4402B;   /* @dirty-red                      */
-@define-color n_green   #5F9E4A;   /* @dirty-green                    */
+@define-color n_green   #57AE3A;   /* @dirty-green                    */
 @define-color n_urgent  #fca002;
 @define-color n_line    #2b2f3d;
 @define-color n_deep    #000000;   /* dolny pasek - najciemniejszy punkt okna */
@@ -497,7 +497,7 @@ menu check:checked, menu radio:checked {
    GTK tooltips are their own toplevel, outside .background:not(#window):not(popover):not(tooltip).
    This mirrors waybar's styles/tooltips.css exactly. */
 tooltip {
-	background-color: #232634;
+	background-color: #11111b;
 	border: 2px solid #CE6B29;
 	border-radius: 0;
 	padding: 0;

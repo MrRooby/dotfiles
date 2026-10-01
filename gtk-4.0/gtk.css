@@ -14,7 +14,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 @define-color n_crust   #11111b;   /* waybar @crust — darkest chrome  */
-@define-color n_surface #232634;   /* @dirty-background — content     */
+@define-color n_surface #181825;   /* waybar @mantle — content, one step above the chrome */
 @define-color n_fg      #d8cab8;   /* @dirty-fg                       */
 @define-color n_dim     #9b9b9b;   /* @dirty-dim                      */
 @define-color n_accent  #CE6B29;   /* @dirty-orange                   */
@@ -37,9 +37,9 @@
 	--accent-color:              #CE6B29;
 	--accent-bg-color:           #CE6B29;
 	--accent-fg-color:           #11111b;
-	--window-bg-color:           #232634;
+	--window-bg-color:           #181825;
 	--window-fg-color:           #d8cab8;
-	--view-bg-color:             #232634;
+	--view-bg-color:             #181825;
 	--view-fg-color:             #d8cab8;
 	--headerbar-bg-color:        #11111b;
 	--headerbar-fg-color:        #d8cab8;
@@ -54,9 +54,9 @@
 	--secondary-sidebar-fg-color: #d8cab8;
 	--card-bg-color:             #2b2f3d;
 	--card-fg-color:             #d8cab8;
-	--dialog-bg-color:           #232634;
+	--dialog-bg-color:           #181825;
 	--dialog-fg-color:           #d8cab8;
-	--popover-bg-color:          #232634;
+	--popover-bg-color:          #181825;
 	--popover-fg-color:          #d8cab8;
 	--thumbnail-bg-color:        #2b2f3d;
 	--thumbnail-fg-color:        #d8cab8;
@@ -308,7 +308,7 @@ scrollbar > range > trough > slider:active { background-color: @n_accent; }
 
 /* ── tooltips — mirrors waybar's styles/tooltips.css ──────────────── */
 tooltip {
-	background-color: @n_surface;
+	background-color: @n_crust;
 	border: 2px solid @n_accent;
 	box-shadow: none;
 	padding: 6px 10px;

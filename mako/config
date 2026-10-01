@@ -12,8 +12,8 @@ text-alignment=left
 max-visible=5
 
 # Colors — shared with wofi/style.css and waybar tooltips
-# background #232634, foreground #d8cab8, accent #CE6B29
-background-color=#232634
+# background #11111b, foreground #d8cab8, accent #CE6B29
+background-color=#11111b
 text-color=#d8cab8
 border-color=#CE6B29
 border-size=2

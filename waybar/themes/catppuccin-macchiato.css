@@ -81,6 +81,7 @@
 @define-color tooltip-br    @dirty-orange;
 @define-color tooltip-fg    @dirty-fg;
 @define-color tooltip-dim   @dirty-dim;
+@define-color tooltip-ok    @green;
 
 /* power profile colors */
 

@@ -29,14 +29,16 @@
 
 @define-color dirty-orange #CE6B29;
 
-/* shared with wofi/style.css and sway/config — keep in sync */
-@define-color dirty-background #232634;
+/* shared with wofi/style.css and themes/kitty/nostromo.conf — keep in sync.
+   same value as @crust: tooltips, wofi and the popups sit on the darkest
+   shade so the dim colours on them keep their contrast */
+@define-color dirty-background #11111b;
 @define-color dirty-fg #d8cab8;
 @define-color dirty-dim #9b9b9b;
 
 /* same warmth/saturation family as dirty-orange */
 @define-color dirty-red #C4402B;
-@define-color dirty-green #5F9E4A;
+@define-color dirty-green #57AE3A;
 
 /*
 	br - border
@@ -79,6 +81,10 @@
 @define-color tooltip-br    @dirty-orange;
 @define-color tooltip-fg    @dirty-fg;
 @define-color tooltip-dim   @dirty-dim;
+/* the "ok / on / online / charging" green in tooltips. not @charging: that
+   one also colours the battery text on the orange block in the bar, where
+   it has to stay a pale green to be readable */
+@define-color tooltip-ok    @dirty-green;
 
 /* state colors */
 
