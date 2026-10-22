@@ -1,0 +1,15 @@
+{
+	/*------------------------------------------------------
+	    typing speed, live / average / peak in the tooltip
+	------------------------------------------------------*/
+
+	"custom/wpm": {
+		"exec": "~/.config/waybar/scripts/wpm.sh",
+		"return-type": "json",
+		"format": "󰓅 {}WPM",
+		// no interval: the script keeps running and prints a line whenever
+		// the score changes. it ends when the daemon goes away, and this
+		// starts it again
+		"restart-interval": 5
+	}
+}

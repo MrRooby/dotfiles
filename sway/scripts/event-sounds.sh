@@ -10,8 +10,10 @@
 # for anything plugged into a USB port, display-in and display-out, for a
 # monitor, fingerprint and fingerprint-wrong, for a scan that matched and one
 # that did not, password, for a password that did not, shutdown, for the
-# machine powering off, and lock, for the screen locking. lock is the one event
-# nothing here watches for: lock.sh plays it on its way to the lock screen.
+# machine powering off, lock, for the screen locking, and battery-low and
+# battery-critical. Those last three nothing here watches for: lock.sh plays
+# lock on its way to the lock screen, and waybar's battery.sh plays the battery
+# pair alongside its own notifications, at its own thresholds.
 #
 # Which file each one plays is the table below; the files are in sounds/hl2,
 # all Half-Life sounds:
@@ -27,6 +29,11 @@
 #       ("... health-charger-sound" for the last); converted from mp3, the
 #       first with its trailing silence cut off, the last cut down from 13.8s
 #       to its first 1.6s and faded out
+#   hev-power-20, hev-power-10
+#       the suit's voice, its words strung end to end as the game does it:
+#       fvox/fuzz twice, power_level_is, twenty, percent -- and for the other
+#       boop three times, warning, power_level_is, ten, percent. The figures
+#       are spoken, so they only hold while battery.sh warns at 20 and 10.
 #   power-down
 #       the first 3.2s of ambient/energy/powerdown2.wav, faded out
 #   power-cut
@@ -58,6 +65,8 @@ declare -A SOUND=(
 	[password]=access-denied.wav
 	[lock]=power-deadbolt-2.wav
 	[shutdown]=power-down.wav
+	[battery-low]=hev-power-20.wav
+	[battery-critical]=hev-power-10.wav
 )
 
 play() {
@@ -342,7 +351,7 @@ watch_shutdown() {
 # test is the old name for play
 if [ "${1:-}" = "play" ] || [ "${1:-}" = "test" ]; then
 	if [[ -z ${2:-} || ! -v SOUND[$2] ]]; then
-		echo "usage: ${0##*/} play connect|disconnect|usb-in|usb-out|display-in|display-out|fingerprint|fingerprint-wrong|password|lock|shutdown" >&2
+		echo "usage: ${0##*/} play connect|disconnect|usb-in|usb-out|display-in|display-out|fingerprint|fingerprint-wrong|password|lock|shutdown|battery-low|battery-critical" >&2
 		exit 2
 	fi
 	play "$2"

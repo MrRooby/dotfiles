@@ -49,7 +49,8 @@ Every GTK3, GTK4 and libadwaita app, via `gtk-3.0/gtk.css` + `gtk-4.0/gtk.css`.
 
 ## Firefox
 
-`userChrome.css`, overrides any installed theme.
+`userChrome.css`, overrides any installed theme. Page scrollbar colours are
+set in `user.js`.
 
 ![firefox](screenshots/firefox.png)
 
@@ -78,8 +79,8 @@ in `~/.claude/settings.json`:
 - **sway** — no gaps, 2px borders, autotiling
 - **kitty** — JetBrainsMono Nerd Font
 - **ly** — TTY login
-- **hyprlock + hypridle** — lock and idle
-- **event sounds** — Half-Life effects for the charger, USB devices and monitors going in or out, a fingerprint match, a wrong fingerprint or password, locking and powering off
+- **hyprlock + hypridle** — lock and idle; the keyboard backlight is put back after sleep
+- **event sounds** — Half-Life effects for the charger, USB devices and monitors going in or out, a fingerprint match, a wrong fingerprint or password, locking, powering off and a low battery
 - **nostromo** icons, **retro-cursor** cursors, Kvantum for Qt
 - **keyd** — keyboard remapping
 

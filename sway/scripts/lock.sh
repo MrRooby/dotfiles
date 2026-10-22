@@ -9,11 +9,17 @@
 # hyprlock does not set logind's LockedHint, so the sound has to be played by
 # whoever starts the lock screen.
 #
-# The pidof check is the one hypridle's lock_cmd used to carry: a second
-# hyprlock on top of the first would hold its own claim on the fingerprint
-# reader.
+# Only one hyprlock may run: a second one on top of the first holds its own
+# claim on the fingerprint reader, and one of the two then never exits after
+# unlock, which blocks every later lock. Closing the lid runs this script twice
+# in the same instant -- sway's lid switch and hypridle's before_sleep -- and a
+# pidof check alone lets both through. The flock makes it atomic: one caller at
+# a time gets to look and start, the other leaves.
+
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/hyprlock-start.lock"
+flock -n 9 || exit 0
 
 pidof hyprlock >/dev/null && exit 0
 
-"$(dirname "$(readlink -f "$0")")/event-sounds.sh" play lock &
-exec hyprlock
+"$(dirname "$(readlink -f "$0")")/event-sounds.sh" play lock 9>&- &
+exec hyprlock 9>&-

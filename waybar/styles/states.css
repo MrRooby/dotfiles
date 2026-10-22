@@ -13,6 +13,8 @@
 /* inactive state */
 #idle_inhibitor.deactivated,
 #mpris.paused,
+#custom-wpm.idle,
+#custom-wpm.offline,
 #pulseaudio.output.muted,
 #pulseaudio.input.source-muted,
 #wireplumber.muted {

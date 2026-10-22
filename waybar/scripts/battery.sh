@@ -451,21 +451,35 @@ announce() {
 	notify-send "$@" -h string:x-canonical-private-synchronous:battery >/dev/null 2>&1
 }
 
+# The spoken warning that goes with a notification. event-sounds.sh lives with
+# the sway config, so there is none where that is not installed. Unlike
+# notify-send this cannot run in the foreground -- the sound is seconds long --
+# so it is cut loose instead: setsid takes it out of reach of the reaping, and
+# with every stream on /dev/null it holds no end of waybar's pipe open.
+chime() {
+	[ -x ~/.config/sway/scripts/event-sounds.sh ] || return 0
+	setsid -f ~/.config/sway/scripts/event-sounds.sh play "$1" </dev/null >/dev/null 2>&1
+}
+
 case "$status" in
 	Discharging)
 		armed[full]=1
 
 		if [ "$capacity" -le "$CRIT" ]; then
-			[ "${armed[crit]:-1}" -eq 1 ] &&
+			if [ "${armed[crit]:-1}" -eq 1 ]; then
 				announce "Battery Critical (${CRIT}%)" -u critical -i battery-010
+				chime battery-critical
+			fi
 			armed[crit]=0
 		elif [ "$capacity" -ge $(( CRIT + HYSTERESIS )) ]; then
 			armed[crit]=1
 		fi
 
 		if [ "$capacity" -le "$WARN" ]; then
-			[ "$capacity" -gt "$CRIT" ] && [ "${armed[warn]:-1}" -eq 1 ] &&
+			if [ "$capacity" -gt "$CRIT" ] && [ "${armed[warn]:-1}" -eq 1 ]; then
 				announce "Battery Low (${WARN}%)" -u critical -i battery-020
+				chime battery-low
+			fi
 			armed[warn]=0
 		elif [ "$capacity" -ge $(( WARN + HYSTERESIS )) ]; then
 			armed[warn]=1

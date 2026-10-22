@@ -7,6 +7,7 @@
 		// "max-length": 9 would clip a 4-digit reading exactly at the edge
 		// "max-length":
 		"exec": "~/.config/waybar/scripts/fan.sh",
+		"return-type": "json",
 		// "align":
 		// "justify":
 		// "rotate":
@@ -17,7 +18,8 @@
 		// "on-scroll-up":
 		// "on-scroll-down":
 		// "smooth-scrolling-threshold":
-		"tooltip": false
+		// level, controlling temperature and thinkfan's curve, from fan.sh
+		"tooltip": true
 		// "expand":
 	}
 }

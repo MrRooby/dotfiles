@@ -132,6 +132,7 @@ input "type:touchpad" {
     natural_scroll enabled
     dwt enabled
     tap enabled
+    click_method clickfinger 
 }
 
 input "2:10:TPPS/2_Elan_TrackPoint" {
@@ -209,10 +210,13 @@ for_window [app_id="zenity"]   floating enable, move position center, resize set
 for_window [class="bluetui-popup"]           floating enable, border pixel 2, resize set 700 700
 for_window [class="impala-popup"]            floating enable, border pixel 2, resize set 700 700
 for_window [app_id="org.telegram.desktop"]   floating enable, border pixel 2, resize set 900 700, move absolute position 610 30
-for_window [app_id="wdisplays"]              floating enable, resize set 900 600, move position center
+for_window [app_id="nwg-displays"]           floating enable, move position center, exec "sleep 0.3; swaymsg '[app_id=nwg-displays] resize set 1038 531, move position center'"
 for_window [app_id="org.gnome.Loupe"]        floating enable, resize set 800 600, move position center
 for_window [class="Vtk"]                     floating enable, resize set 800 600, move position center
 for_window [app_id="org.pulseaudio.pavucontrol"] floating enable, resize set 700 900, move position center
+for_window [class="PrusaSlicer"]             floating enable, resize set 800 600, move position center
+for_window [class="KiCad" title="3D Viewer"] floating enable, resize set 1200 800, move position center
+for_window [class="Emulator" instance="qemu-system-x86_64"] floating enable, move position center
 
 # Unity popups minimum boundaries rules
 for_window [class="Unity" title="Project Settings"] floating enable, resize set 250 250
@@ -228,4 +232,8 @@ for_window [class="Unity" title="HDR Color"] floating enable, move position cent
 
 include @sysconfdir@/sway/config.d/*
 
-include output.conf
+include outputs
+include workspaces
+
+# No middle-click paste: turn off the primary selection (needs a sway restart / re-login)
+primary_selection disabled

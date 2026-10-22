@@ -4,6 +4,48 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TRACKS_FILE="$SCRIPT_DIR/.tracked_folders"
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles-manager/backups"
 
+# ─── Colors (nostromo "dirty" palette, see waybar/current-theme.css) ──────────
+C_ORANGE="#CE6B29"
+C_FG="#d8cab8"
+C_DIM="#9b9b9b"
+C_RED="#C4402B"
+C_GREEN="#57AE3A"
+C_YELLOW="#f9e2af"
+C_BG="#11111b"
+
+# Theme every gum component via its env vars
+export GUM_CHOOSE_CURSOR_FOREGROUND="$C_ORANGE"
+export GUM_CHOOSE_HEADER_FOREGROUND="$C_DIM"
+export GUM_CHOOSE_ITEM_FOREGROUND="$C_FG"
+export GUM_CHOOSE_SELECTED_FOREGROUND="$C_ORANGE"
+export GUM_CONFIRM_PROMPT_FOREGROUND="$C_FG"
+export GUM_CONFIRM_SELECTED_FOREGROUND="$C_BG"
+export GUM_CONFIRM_SELECTED_BACKGROUND="$C_ORANGE"
+export GUM_CONFIRM_UNSELECTED_FOREGROUND="$C_FG"
+export GUM_CONFIRM_UNSELECTED_BACKGROUND="#313244"
+export GUM_FILTER_INDICATOR_FOREGROUND="$C_ORANGE"
+export GUM_FILTER_MATCH_FOREGROUND="$C_ORANGE"
+export GUM_FILTER_PROMPT_FOREGROUND="$C_ORANGE"
+export GUM_FILTER_TEXT_FOREGROUND="$C_FG"
+export GUM_FILTER_CURSOR_TEXT_FOREGROUND="$C_FG"
+export GUM_FILTER_PLACEHOLDER_FOREGROUND="$C_DIM"
+export GUM_FILTER_HEADER_FOREGROUND="$C_DIM"
+export GUM_INPUT_CURSOR_FOREGROUND="$C_ORANGE"
+export GUM_INPUT_PROMPT_FOREGROUND="$C_ORANGE"
+export GUM_INPUT_PLACEHOLDER_FOREGROUND="$C_DIM"
+export GUM_SPIN_SPINNER_FOREGROUND="$C_ORANGE"
+export GUM_SPIN_TITLE_FOREGROUND="$C_FG"
+export GUM_FILE_CURSOR_FOREGROUND="$C_ORANGE"
+export GUM_FILE_DIRECTORY_FOREGROUND="$C_ORANGE"
+export GUM_FILE_FILE_FOREGROUND="$C_FG"
+export GUM_FILE_SELECTED_FOREGROUND="$C_ORANGE"
+export GUM_FILE_PERMISSIONS_FOREGROUND="$C_DIM"
+export GUM_FILE_FILE_SIZE_FOREGROUND="$C_DIM"
+export GUM_PAGER_LINE_NUMBER_FOREGROUND="$C_DIM"
+export GUM_PAGER_MATCH_FOREGROUND="$C_ORANGE"
+export GUM_PAGER_MATCH_HIGH_FOREGROUND="$C_BG"
+export GUM_PAGER_MATCH_HIGH_BACKGROUND="$C_ORANGE"
+
 # ─── Global arrays (populated by load_tracks) ──────────────────────────────────
 TRACK_LABELS=()     # "~/.config/hypr → hypr"  (shown in menus)
 TRACK_SYS=()        # expanded system path  (for filesystem ops)
@@ -16,8 +58,8 @@ TRACK_REPO_REL=()   # relative repo path    (for grep/removal)
 title() {
     gum style \
         --border double \
-        --border-foreground 99 \
-        --foreground 99 \
+        --border-foreground "$C_ORANGE" \
+        --foreground "$C_FG" \
         --bold \
         --align center \
         --width 56 \
@@ -28,21 +70,21 @@ title() {
 section() {
     gum style \
         --border rounded \
-        --border-foreground 166 \
-        --foreground 166 \
+        --border-foreground "$C_DIM" \
+        --foreground "$C_ORANGE" \
         --bold \
         --padding "0 1" \
         "$1"
 }
 
-info()  { gum style --foreground 82  " ✓ $*"; }
-warn()  { gum style --foreground 214 " ⚠ $*"; }
-error() { gum style --foreground 196 " ✗ $*"; }
-step()  { gum style --foreground 172 " → $*"; }
+info()  { gum style --foreground "$C_GREEN"  " ✓ $*"; }
+warn()  { gum style --foreground "$C_YELLOW" " ⚠ $*"; }
+error() { gum style --foreground "$C_RED" " ✗ $*"; }
+step()  { gum style --foreground "$C_DIM" " → $*"; }
 
 pause() {
     echo ""
-    read -rsp $'\033[38;5;166m  Press ENTER to continue...\033[0m'
+    read -rsp $'\033[38;2;206;107;41m  Press ENTER to continue...\033[0m'
     echo ""
 }
 
@@ -169,7 +211,7 @@ action_diff() {
 
     local selections
     selections=$(gum choose --no-limit \
-        --header "SPACE to select, ENTER to confirm — select folder(s) to diff:" \
+        --header "TAB or x to select, ENTER to confirm — select folder(s) to diff:" \
         "${menu_items[@]}") || return
     [[ -z "$selections" ]] && return
 
@@ -190,11 +232,11 @@ action_diff() {
             local label="${TRACK_LABELS[$i]}"
 
             if [[ ! -e "$sys" ]]; then
-                combined_diff+=$'\n'"$(gum style --foreground 196 "✗ System path not found: $sys")"$'\n'
+                combined_diff+=$'\n'"$(gum style --foreground "$C_RED" "✗ System path not found: $sys")"$'\n'
                 continue
             fi
             if [[ ! -e "$repo" ]]; then
-                combined_diff+=$'\n'"$(gum style --foreground 196 "✗ Repo path not found: $repo")"$'\n'
+                combined_diff+=$'\n'"$(gum style --foreground "$C_RED" "✗ Repo path not found: $repo")"$'\n'
                 continue
             fi
 
@@ -203,7 +245,7 @@ action_diff() {
 
             if [[ -n "$diff_out" ]]; then
                 has_diff=true
-                combined_diff+=$'\n'"$(gum style --bold --foreground 99 "━━━ $label ━━━")"$'\n'
+                combined_diff+=$'\n'"$(gum style --bold --foreground "$C_ORANGE" "━━━ $label ━━━")"$'\n'
                 combined_diff+="$diff_out"$'\n'
             fi
         done
@@ -221,11 +263,11 @@ action_diff() {
             local repo="${TRACK_REPO[$idx]}"
 
             if [[ ! -e "$sys" ]]; then
-                combined_diff+=$'\n'"$(gum style --foreground 196 "✗ System path not found: $sys")"$'\n'
+                combined_diff+=$'\n'"$(gum style --foreground "$C_RED" "✗ System path not found: $sys")"$'\n'
                 continue
             fi
             if [[ ! -e "$repo" ]]; then
-                combined_diff+=$'\n'"$(gum style --foreground 196 "✗ Repo path not found: $repo")"$'\n'
+                combined_diff+=$'\n'"$(gum style --foreground "$C_RED" "✗ Repo path not found: $repo")"$'\n'
                 continue
             fi
 
@@ -234,7 +276,7 @@ action_diff() {
 
             if [[ -n "$diff_out" ]]; then
                 has_diff=true
-                combined_diff+=$'\n'"$(gum style --bold --foreground 99 "━━━ $selected ━━━")"$'\n'
+                combined_diff+=$'\n'"$(gum style --bold --foreground "$C_ORANGE" "━━━ $selected ━━━")"$'\n'
                 combined_diff+="$diff_out"$'\n'
             fi
         done <<< "$selections"
@@ -268,12 +310,12 @@ action_push() {
     local menu_items=("[All folders]" "${TRACK_LABELS[@]}")
     local selections
     selections=$(gum choose --no-limit \
-        --header "SPACE to select, ENTER to confirm — push system → repo:" \
+        --header "TAB or x to select, ENTER to confirm — push system → repo:" \
         "${menu_items[@]}") || return
     [[ -z "$selections" ]] && return
 
     local backup=no
-    gum confirm "Create a backup of existing repo folders before pushing?" \
+    gum confirm --default=false "Create a backup of existing repo folders before pushing?" \
         && backup=yes || true
 
     echo ""
@@ -329,12 +371,12 @@ action_update() {
     local menu_items=("[All folders]" "${TRACK_LABELS[@]}")
     local selections
     selections=$(gum choose --no-limit \
-        --header "SPACE to select, ENTER to confirm — update repo → system:" \
+        --header "TAB or x to select, ENTER to confirm — update repo → system:" \
         "${menu_items[@]}") || return
     [[ -z "$selections" ]] && return
 
     local backup=no
-    gum confirm "Create a backup of existing system folders before updating?" \
+    gum confirm --default=false "Create a backup of existing system folders before updating?" \
         && backup=yes || true
 
     echo ""
@@ -405,12 +447,12 @@ action_manage() {
                 local sys_path
                 case "$src_method" in
                     "Pick a folder from ~/.config")
-                        gum style --foreground 172 "  Select a config folder from ~/.config:"
+                        gum style --foreground "$C_DIM" "  Select a config folder from ~/.config:"
                         sys_path=$(find "$HOME/.config" -maxdepth 1 -mindepth 1 -type d | sort | \
                             gum filter --placeholder "Type to filter..." --height 20) || continue
                         ;;
                     "Browse files/folders from home (~)")
-                        gum style --foreground 172 "  Navigate and select a file or folder (a to toggle hidden):"
+                        gum style --foreground "$C_DIM" "  Navigate and select a file or folder (a to toggle hidden):"
                         sys_path=$(gum file --all "$HOME") || continue
                         ;;
                     "Type a path manually (file or folder)")
@@ -444,7 +486,7 @@ action_manage() {
 
                 local repo_rel
                 if [[ "$repo_pick" == "Browse repo for existing folder" ]]; then
-                    gum style --foreground 172 "  Navigate to the repo subfolder and press ENTER:"
+                    gum style --foreground "$C_DIM" "  Navigate to the repo subfolder and press ENTER:"
                     local repo_path
                     repo_path=$(gum file --all --directory "$SCRIPT_DIR") || continue
                     [[ -z "$repo_path" ]] && warn "Cancelled." && continue
@@ -478,7 +520,7 @@ action_manage() {
 
                 local to_remove
                 to_remove=$(gum choose --no-limit \
-                    --header "SPACE to select, ENTER to confirm removal:" \
+                    --header "TAB or x to select, ENTER to confirm removal:" \
                     "${TRACK_LABELS[@]}") || continue
                 [[ -z "$to_remove" ]] && continue
 
@@ -506,7 +548,7 @@ action_manage() {
                 else
                     local i=1
                     for label in "${TRACK_LABELS[@]}"; do
-                        gum style --foreground 172 "  $i.  $label"
+                        gum style --foreground "$C_DIM" "  $i.  $label"
                         i=$((i + 1))
                     done
                 fi
@@ -550,7 +592,7 @@ main() {
     done
 
     echo ""
-    gum style --foreground 99 --bold "Goodbye!"
+    gum style --foreground "$C_ORANGE" --bold "Goodbye!"
     echo ""
 }
 

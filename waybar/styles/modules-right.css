@@ -40,6 +40,11 @@
 	background-color: @backlight;
 	color: @battery;
 }
+#custom-wpm {
+	padding: 0 5px;
+	background-color: @battery;
+	color: @dirty-orange;
+}
 #custom-keyboard{
 	padding: 0 10px 0 5px;
 	background-color: @battery;
