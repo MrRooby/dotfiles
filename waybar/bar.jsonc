@@ -1,0 +1,90 @@
+{
+    "include": [
+        "~/.config/waybar/modules/*.jsonc",
+        "~/.config/waybar/modules/custom/*.jsonc",
+        "~/.config/waybar/modules/sway/*.jsonc"
+
+        // modules that are not included by default:
+        // "~/.config/waybar/modules/extras/*.jsonc"
+    ],
+
+    // Bypasses the asynchronous D-Bus portal theme check to eliminate the 60s startup hang
+    "locale": "",
+
+    /*------------
+        layout
+    ------------*/
+
+    "modules-left": [
+        "custom/left_div#1",
+        "sway/workspaces",
+        "custom/right_div#1",
+        "sway/window"
+    ],
+    "modules-center": [
+        "custom/center_pad",
+        "custom/left_div#2",
+        "custom/fan",
+        "custom/left_div#3",
+        "custom/temperature",
+        "custom/left_div#4",
+        "custom/cpu",
+        "custom/left_div#5",
+        "clock#time",
+        "custom/right_div#2",
+        "custom/date",
+        "custom/right_div#3",
+        "custom/memory",
+        "custom/right_div#4",
+        "custom/network",
+        "custom/bluetooth",
+        "custom/hotspot",
+        "custom/tailscale",
+        "custom/caffeine",
+        "custom/right_div#5"
+    ],
+    "modules-right": [
+        "mpris",
+        "custom/left_div#6",
+        "group/pulseaudio",
+        "custom/left_div#7",
+        "custom/brightness",
+        "custom/left_div#8",
+        "custom/wpm",
+        "custom/keyboard",
+        "custom/left_div#9",
+        "group/battery_profile"
+    ],
+
+    /*-------------
+        options
+    -------------*/
+
+    // "expand-center":
+    // "expand-left":
+    // "expand-right":
+    "layer": "top",
+    // "output":
+    "position": "top",
+    "height": "auto",
+    "width": "auto",
+    "margin": 0,
+    "exclusive": true, 
+    // "margin-top":
+    // "margin-left":
+    // "margin-bottom":
+    // "margin-right":
+    // "no-center":
+    "spacing": 0,
+    // "name":
+    "mode": "dock",
+    // "start_hidden":
+    // "modifier-reset":
+    "fixed-center": true,
+    // "passthrough":
+    // "ipc":
+    // "id":
+    "reload_style_on_change": true
+    // "on-sigusr1":
+    // "on-sigusr2":
+}

@@ -3,7 +3,8 @@
 	    battery level + power profile switcher
 	--------------------------------------------*/
 
-	// hovering the battery percentage slides out the three profile buttons.
+	// hovering the battery percentage slides out the four profile buttons.
+	// turbo is performance with raised CPU power limits (ryzen-limits.service).
 	// this lives in modules-right, which is anchored to the right edge, so
 	// the block can only grow leftwards — the centre island never moves.
 	//
@@ -15,6 +16,7 @@
 		"modules": [
 			"custom/battery",
 			"custom/left_div#10",
+			"custom/pp_turbo",
 			"custom/pp_performance",
 			"custom/pp_balanced",
 			"custom/pp_saver"
@@ -24,6 +26,16 @@
 			"transition-left-to-right": true,
 			"children-class": "pp-item"
 		}
+	},
+
+	"custom/pp_turbo": {
+		"exec": "~/.config/waybar/scripts/power-profile.sh get turbo",
+		"return-type": "json",
+		"interval": 10,
+		"signal": 7,
+		"on-click": "~/.config/waybar/scripts/power-profile.sh set turbo",
+		"min-length": 3,
+		"max-length": 3
 	},
 
 	"custom/pp_performance": {

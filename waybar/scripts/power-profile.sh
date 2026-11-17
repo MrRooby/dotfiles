@@ -4,6 +4,11 @@
 #
 #   power-profile.sh get <profile>   -> waybar json for one drawer button
 #   power-profile.sh set <profile>   -> switch to it and refresh the buttons
+#   power-profile.sh wedge           -> waybar json for the drawer wedge, its
+#                                       class is the active profile
+#
+# "turbo" is not a TLP profile: it is "performance" plus the flag file that
+# makes ryzen-limits.service raise the CPU power limits to 30/35 W.
 #
 # TLP 1.9+ ships tlp-pd, which owns org.freedesktop.UPower.PowerProfiles on
 # the system bus and speaks the same performance/balanced/power-saver profile
@@ -26,9 +31,13 @@ PP_PATH=/org/freedesktop/UPower/PowerProfiles
 # profile code currently applied: 0=performance, 1=balanced, 2=power-saver.
 PP_RUNFILE=/run/tlp/last_pwr
 
+# read by ryzen-limits.service, the directory comes from tmpfiles.d
+TURBO_FLAG=/run/ryzen-limits/turbo
+
 # icon + human label for a profile name
 describe() {
 	case "$1" in
+		turbo)       icon=""; label="Turbo (30 W, loud)" ;;
 		performance) icon=""; label="Performance" ;;
 		balanced)    icon="󰊚"; label="Balanced" ;;
 		power-saver) icon="󰌪"; label="Power saver" ;;
@@ -36,8 +45,18 @@ describe() {
 	esac
 }
 
-# name of the profile TLP is currently applying, empty if it cannot be read
+# name of the profile currently applied, empty if it cannot be read
 current() {
+	local profile
+	profile=$(tlpProfile)
+	if [ "$profile" = performance ] && [ -e "$TURBO_FLAG" ]; then
+		profile=turbo
+	fi
+	printf '%s' "$profile"
+}
+
+# name of the profile TLP is currently applying, empty if it cannot be read
+tlpProfile() {
 	local profile code
 	profile=$(busctl get-property "$PP_BUS" "$PP_PATH" "$PP_BUS" ActiveProfile \
 		2>/dev/null | awk -F'"' '{print $2}')
@@ -57,12 +76,22 @@ current() {
 # apply a profile: over the bus first, falling back to the CLI for setups
 # where tlp-pd is disabled but a passwordless sudo rule for tlp exists
 apply() {
+	if [ "$1" = turbo ]; then
+		touch "$TURBO_FLAG" || return 1
+		applyTlp performance
+	else
+		rm -f "$TURBO_FLAG"
+		applyTlp "$1"
+	fi
+}
+
+applyTlp() {
 	busctl set-property "$PP_BUS" "$PP_PATH" "$PP_BUS" ActiveProfile s "$1" 2>/dev/null \
 		|| sudo -n /usr/sbin/tlp "$1" >/dev/null 2>&1
 }
 
 usage() {
-	echo "usage: ${0##*/} {get|set} {performance|balanced|power-saver}" >&2
+	echo "usage: ${0##*/} {get|set} {turbo|performance|balanced|power-saver}" >&2
 	exit 1
 }
 
@@ -102,6 +131,10 @@ case "$action" in
 			sleep 0.1
 		done
 		pkill -RTMIN+$SIGNAL waybar
+		;;
+
+	wedge)
+		printf '{"text":"","class":"%s"}\n' "$(current)"
 		;;
 
 	*)

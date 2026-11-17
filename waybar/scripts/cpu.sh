@@ -132,7 +132,10 @@ done
 profile=$(busctl get-property org.freedesktop.UPower.PowerProfiles \
 	/org/freedesktop/UPower/PowerProfiles \
 	org.freedesktop.UPower.PowerProfiles ActiveProfile 2>/dev/null | awk -F'"' '{print $2}')
+# turbo = performance + the ryzen-limits.service flag, see power-profile.sh
+[ "$profile" = performance ] && [ -e /run/ryzen-limits/turbo ] && profile=turbo
 case "$profile" in
+	turbo)       icon="" ;;
 	performance) icon="" ;;
 	balanced)    icon="󰊚" ;;
 	power-saver) icon="󰌪" ;;

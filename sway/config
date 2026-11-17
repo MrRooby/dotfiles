@@ -14,11 +14,18 @@ set $fileManager nemo
 exec sh -c 'dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE SWAYSOCK XCURSOR_THEME XCURSOR_SIZE; systemctl --user start sway-session.target'
 exec --no-startup-id sh -c 'eval $(gnome-keyring-daemon --login) eval $(gnome-keyring-daemon --start --components=secrets,ssh) export SSH_AUTH_SOCK'
 exec nm-applet
+# Logitech mouse settings; the mouse forgets them on power off, Solaar restores them
+exec solaar --window=hide
 # via the wrapper, which preloads the fast-tooltip shim -- GTK3 hardcodes a
-# 500ms tooltip delay. Falls back to plain waybar if it cannot build.
+# 500ms tooltip delay -- and picks the PR #5312 waybar build when it runs.
 exec ~/.config/waybar/scripts/waybar-run.sh
+# hover popups for waybar modules (custom/cpu), see waybar-run.sh
+exec qs -c waybar-tooltips
 
 exec /usr/libexec/lxqt-policykit-agent
+# start gvfs's volume monitors now, in the background: the first one after boot
+# takes ~35 s (udisks2), and otherwise the first nemo or file dialog waits on it
+exec gio mount -l
 exec systemctl --user import-environment QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME
 set $env QT_QPA_PLATFORM wayland
 set $env QT_QPA_PLATFORMTHEME qt6ct
@@ -60,7 +67,8 @@ bindsym $mainMod+Shift+f fullscreen toggle
 
 # Screenshots
 bindsym $mainMod+s exec ~/.local/bin/hyprshot --m region --clipboard-only
-bindsym $mainMod+Shift+s exec grim -g "$(slurp)" "$(zenity --file-selection --save --confirm-overwrite --title='save screenshot WHEREE??' --filename='screenshot.png')"
+bindsym $mainMod+Shift+s exec ~/.config/sway/scripts/screenshot-save.sh
+bindsym Print exec ~/.config/sway/scripts/screenshot.sh
 
 # Laptop Multimedia keys mapped to scripts and systems
 bindsym --locked XF86AudioRaiseVolume exec ~/.config/waybar/scripts/volume.sh output raise 2
@@ -202,20 +210,23 @@ client.urgent           #fca002 #141216 #d8cab8 #fca002 #fca002
 
 # ------------- Window Rules
 # Ported directly from your exact floating size arrays and overrides
-for_window [app_id="qalculate-gtk"]          floating enable, move position center, resize set 420 520
-for_window [app_id="nemo"]                   floating enable, move position center, resize set 800 600
-for_window [app_id="xdg-desktop-portal-gtk"] floating enable, move position center, resize set 800 600
-for_window [app_id="org.gnome.FileRoller"]   floating enable, move position center, resize set 700 500
-for_window [app_id="zenity"]   floating enable, move position center, resize set 700 500
-for_window [class="bluetui-popup"]           floating enable, border pixel 2, resize set 700 700
-for_window [class="impala-popup"]            floating enable, border pixel 2, resize set 700 700
-for_window [app_id="org.telegram.desktop"]   floating enable, border pixel 2, resize set 900 700, move absolute position 610 30
-for_window [app_id="nwg-displays"]           floating enable, move position center, exec "sleep 0.3; swaymsg '[app_id=nwg-displays] resize set 1038 531, move position center'"
-for_window [app_id="org.gnome.Loupe"]        floating enable, resize set 800 600, move position center
-for_window [class="Vtk"]                     floating enable, resize set 800 600, move position center
-for_window [app_id="org.pulseaudio.pavucontrol"] floating enable, resize set 700 900, move position center
-for_window [class="PrusaSlicer"]             floating enable, resize set 800 600, move position center
-for_window [class="KiCad" title="3D Viewer"] floating enable, resize set 1200 800, move position center
+for_window [app_id="qalculate-gtk"]              floating enable, move position center, resize set 420 520
+for_window [app_id="nemo"]                       floating enable, move position center, resize set 800 600
+for_window [app_id="xdg-desktop-portal-gtk"]     floating enable, move position center, resize set 800 600
+for_window [app_id="org.gnome.FileRoller"]       floating enable, move position center, resize set 700 500
+for_window [app_id="zenity"]                     floating enable, move position center, resize set 700 500
+for_window [class="bluetui-popup"]               floating enable, border pixel 2, resize set 700 700
+for_window [class="impala-popup"]                floating enable, border pixel 2, resize set 700 700
+for_window [app_id="org.telegram.desktop"]       floating enable, border pixel 2, resize set 900 700, move absolute position 610 30
+for_window [app_id="nwg-displays"]               floating enable, exec "sleep 0.3; swaymsg '[app_id=nwg-displays] resize set 1038 531, move position 100 ppt 0 ppt, move left 1038 px'"
+for_window [app_id="org.gnome.Loupe"]            floating enable, resize set 800 600, move position center
+for_window [class="Vtk"]                         floating enable, resize set 800 600, move position center
+# top-right corner, flush under waybar: `move position` is relative to the
+# workspace (already below the bar), 100 ppt puts the left edge at the screen
+# edge, then step back by the window's width (resize set includes the border)
+for_window [app_id="org.pulseaudio.pavucontrol"] floating enable, resize set 712 564, move position 100 ppt 0 ppt, move left 712 px
+for_window [class="PrusaSlicer"]                 floating enable, resize set 800 600, move position center
+for_window [class="KiCad" title="3D Viewer"]     floating enable, resize set 1200 800, move position center
 for_window [class="Emulator" instance="qemu-system-x86_64"] floating enable, move position center
 
 # Unity popups minimum boundaries rules

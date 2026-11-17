@@ -9,6 +9,14 @@
 		"exec": "~/.config/waybar/scripts/cpu.sh",
 		"return-type": "json",
 		"interval": 1,
+		// The tooltip is a Quickshell popup (~/.config/quickshell/waybar-tooltips),
+		// opened by on-enter/on-leave. Those hooks come from waybar PR #5312, and
+		// WAYBAR_OUTPUT_NAME in them from a local patch on top: waybar-run.sh
+		// starts ~/.local/lib/waybar-pr5312/waybar, built from ~/src/waybar-pr5312.
+		// The packaged waybar ignores both hooks, so there the module has no tooltip.
+		"tooltip": false,
+		"on-enter": "echo \"enter custom-cpu $WAYBAR_OUTPUT_NAME\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+		"on-leave": "echo leave | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
 		"min-length": 6,
 		"max-length": 6
 	}

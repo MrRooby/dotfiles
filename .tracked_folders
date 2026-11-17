@@ -17,3 +17,4 @@
 ~/.mozilla/firefox/zr1gpgry.default-release/chrome|firefox/chrome
 ~/.mozilla/firefox/zr1gpgry.default-release/user.js|firefox/user.js
 ~/.claude/statusline.sh|claude/statusline.sh
+~/.config/quickshell|quickshell

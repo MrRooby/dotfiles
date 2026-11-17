@@ -27,7 +27,8 @@
 	background-color: @volume;
 	color: @backlight;
 }
-#backlight {
+#backlight,
+#custom-brightness {
 	color: @dirty-orange;
 	background-color: @backlight;
 }
@@ -79,14 +80,20 @@
 	background-color: @dirty-orange;
 	color: @battery;
 }
+/* the first button is active: the wedge becomes its arrow tip */
+#custom-left_div.10.turbo {
+	color: @pp-turbo;
+}
 
 #battery_profile,
+#custom-pp_turbo,
 #custom-pp_performance,
 #custom-pp_balanced,
 #custom-pp_saver {
 	background-color: @battery;
 }
 
+#custom-pp_turbo,
 #custom-pp_performance,
 #custom-pp_balanced,
 #custom-pp_saver {
@@ -94,6 +101,9 @@
 	font-size: 15px;
 }
 
+#custom-pp_turbo {
+	color: @pp-turbo;
+}
 #custom-pp_performance {
 	color: @pp-performance;
 }
@@ -105,6 +115,10 @@
 }
 
 /* active profile is inverted, same treatment as #entry:selected in wofi */
+#custom-pp_turbo.active {
+	background-color: @pp-turbo;
+	color: @tooltip-bg;
+}
 #custom-pp_performance.active {
 	background-color: @pp-performance;
 	color: @tooltip-bg;

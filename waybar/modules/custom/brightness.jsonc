@@ -1,0 +1,18 @@
+{
+	// Brightness of the screen this bar sits on. The exec / on-scroll commands
+	// are set per bar in config.jsonc ("internal" for the laptop panel, "ddc"
+	// for an external monitor), because waybar does not tell on-scroll commands
+	// which output they fired on. The script sends signal 13 after every scroll.
+	"custom/brightness": {
+		"format": "{icon} {text}",
+		"format-icons": [
+			"", "", "", "", "", "", "", "", ""
+		],
+		"return-type": "json",
+		"signal": 13,
+		"min-length": 7,
+		"max-length": 7,
+		"tooltip": true,
+		"on-click": "nwg-displays"  // window placed top-right by the sway for_window rule
+	}
+}

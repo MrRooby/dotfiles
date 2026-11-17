@@ -29,15 +29,36 @@
  *
  * Delay in ms via GTK_TOOLTIP_DELAY_MS, default 50.
  *
+ * Quickshell popups. Modules named in WAYBAR_QS_TOOLTIPS (space separated
+ * CSS ids, e.g. "custom-cpu") get no GTK tooltip: when GTK is about to show
+ * one, the module's position goes to Quickshell over a unix socket instead
+ * ($XDG_RUNTIME_DIR/waybar-tooltips.sock), and Quickshell draws an
+ * interactive popup under the module. One line per event:
+ *
+ *   enter <module> <monitor-x> <monitor-y> <module-x> <module-width> <bar-height>
+ *   leave
+ *
+ * "leave" comes from polling the pointer every 30ms while a popup is up; GTK
+ * has no leave hook we can reach. If nothing listens on the socket the GTK
+ * tooltip is left alone, so stopping Quickshell gives the old tooltip back.
+ *
  *   gcc -shared -fPIC -O2 -o libfasttooltip.so fast-tooltip.c \
- *       $(pkg-config --cflags glib-2.0)
+ *       $(pkg-config --cflags gtk+-3.0)
+ *
+ * Nothing is linked: the GTK calls resolve lazily against the waybar they are
+ * preloaded into, and the scripts waybar spawns inherit LD_PRELOAD without
+ * ever calling them.
  */
 
 #define _GNU_SOURCE
 #include <dlfcn.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glib.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <unistd.h>
+#include <gtk/gtk.h>
 
 #define TOOLTIP_SOURCE_NAME "[gtk+] tooltip_popup_timeout"
 #define HOVER_TIMEOUT       500
@@ -71,6 +92,152 @@ static guint delay_ms(void)
 	return cached;
 }
 
+/* ---- Quickshell popups ------------------------------------------------ */
+
+static int qs_fd = -1;
+static char qs_module[64];	/* module handed to Quickshell, "" if none */
+static guint qs_poll_id;
+
+static gboolean qs_send(const char *line)
+{
+	size_t len = strlen(line);
+	const char *dir;
+	struct sockaddr_un addr = { .sun_family = AF_UNIX };
+
+	for (int attempt = 0; attempt < 2; attempt++) {
+		if (qs_fd < 0) {
+			dir = getenv("XDG_RUNTIME_DIR");
+			if (!dir)
+				return FALSE;
+			snprintf(addr.sun_path, sizeof addr.sun_path,
+				 "%s/waybar-tooltips.sock", dir);
+			qs_fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+			if (qs_fd < 0)
+				return FALSE;
+			if (connect(qs_fd, (struct sockaddr *)&addr,
+				    sizeof addr) < 0) {
+				close(qs_fd);
+				qs_fd = -1;
+				return FALSE;
+			}
+		}
+		if (send(qs_fd, line, len, MSG_NOSIGNAL | MSG_DONTWAIT) ==
+		    (ssize_t)len)
+			return TRUE;
+		/* Quickshell restarted: reconnect once */
+		close(qs_fd);
+		qs_fd = -1;
+	}
+	return FALSE;
+}
+
+static gboolean qs_handled(const char *name)
+{
+	const char *list = getenv("WAYBAR_QS_TOOLTIPS");
+	size_t n;
+
+	if (!list || !name || !*name)
+		return FALSE;
+	n = strlen(name);
+	for (const char *p = list; (p = strstr(p, name)); p += n)
+		if ((p == list || p[-1] == ' ') && (p[n] == '\0' || p[n] == ' '))
+			return TRUE;
+	return FALSE;
+}
+
+/* The waybar module (the widget carrying the CSS id) under the pointer. */
+static GtkWidget *qs_module_under_pointer(GdkDisplay *display)
+{
+	GdkSeat *seat = gdk_display_get_default_seat(display);
+	GdkDevice *pointer = seat ? gdk_seat_get_pointer(seat) : NULL;
+	GdkWindow *win;
+	gpointer data = NULL;
+	GtkWidget *child;
+
+	if (!pointer)
+		return NULL;
+	win = gdk_device_get_window_at_position(pointer, NULL, NULL);
+	if (!win)
+		return NULL;
+	gdk_window_get_user_data(win, &data);
+
+	for (GtkWidget *w = data; w; w = gtk_widget_get_parent(w)) {
+		if (qs_handled(gtk_widget_get_name(w)))
+			return w;
+		/* waybar names the label, the event box above it has the window */
+		if (GTK_IS_BIN(w)) {
+			child = gtk_bin_get_child(GTK_BIN(w));
+			if (child && qs_handled(gtk_widget_get_name(child)))
+				return child;
+		}
+	}
+	return NULL;
+}
+
+static void qs_hide_gtk_tooltip(void)
+{
+	GList *tops = gtk_window_list_toplevels();
+
+	for (GList *l = tops; l; l = l->next)
+		if (strcmp(G_OBJECT_TYPE_NAME(l->data), "GtkTooltipWindow") == 0 &&
+		    gtk_widget_get_visible(l->data))
+			gtk_widget_hide(l->data);
+	g_list_free(tops);
+}
+
+static gboolean qs_poll(gpointer display)
+{
+	GtkWidget *w = qs_module_under_pointer(display);
+
+	if (w && strcmp(gtk_widget_get_name(w), qs_module) == 0)
+		return G_SOURCE_CONTINUE;
+
+	qs_send("leave\n");
+	qs_module[0] = '\0';
+	qs_poll_id = 0;
+	return G_SOURCE_REMOVE;
+}
+
+/*
+ * Runs in place of GTK's tooltip_popup_timeout. GTK still shows its tooltip
+ * (that keeps its own bookkeeping straight), and for a handed-over module it
+ * is hidden again before the next frame is drawn, so it never appears.
+ */
+static gboolean qs_popup_trampoline(gpointer data)
+{
+	GdkDisplay *display = data;
+	GtkWidget *w = qs_module_under_pointer(display);
+	gboolean ret = popup_fn(data);
+	GtkWidget *top;
+	GdkMonitor *mon;
+	GdkRectangle geo = { 0 };
+	int x = 0, y = 0;
+	char line[256];
+
+	if (!w)
+		return ret;
+
+	if (strcmp(gtk_widget_get_name(w), qs_module) != 0) {
+		top = gtk_widget_get_toplevel(w);
+		mon = gdk_display_get_monitor_at_window(display,
+						gtk_widget_get_window(top));
+		if (mon)
+			gdk_monitor_get_geometry(mon, &geo);
+		gtk_widget_translate_coordinates(w, top, 0, 0, &x, &y);
+		snprintf(line, sizeof line, "enter %s %d %d %d %d %d\n",
+			 gtk_widget_get_name(w), geo.x, geo.y, x,
+			 gtk_widget_get_allocated_width(w),
+			 gtk_widget_get_allocated_height(top));
+		if (!qs_send(line))
+			return ret;	/* nobody listening: keep the GTK tooltip */
+		g_strlcpy(qs_module, gtk_widget_get_name(w), sizeof qs_module);
+		if (!qs_poll_id)
+			qs_poll_id = g_timeout_add(30, qs_poll, display);
+	}
+	qs_hide_gtk_tooltip();
+	return ret;
+}
+
 guint gdk_threads_add_timeout_full(gint priority, guint interval,
 				   GSourceFunc function, gpointer data,
 				   GDestroyNotify notify)
@@ -82,8 +249,12 @@ guint gdk_threads_add_timeout_full(gint priority, guint interval,
 		real = (add_timeout_full_fn)dlsym(RTLD_NEXT,
 						  "gdk_threads_add_timeout_full");
 
-	if (function == popup_fn && interval == HOVER_TIMEOUT)
-		interval = delay_ms();
+	if (popup_fn && function == popup_fn) {
+		if (interval == HOVER_TIMEOUT)
+			interval = delay_ms();
+		if (getenv("WAYBAR_QS_TOOLTIPS"))
+			function = qs_popup_trampoline;
+	}
 
 	id = real(priority, interval, function, data, notify);
 

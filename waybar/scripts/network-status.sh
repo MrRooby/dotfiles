@@ -10,7 +10,7 @@
 # DNS and live traffic -- and lists any other active connection under it, so
 # a dock's ethernet and the Wi-Fi it overrides are both visible.
 #
-# Requirements: iproute2, NetworkManager (nmcli), iw
+# Requirements: iproute2, NetworkManager (nmcli), iw, curl
 #
 # nmcli is spawned once for the device list, once per connected device and
 # once for the active access point: ~20 ms each, fine at a 5 s poll.
@@ -169,6 +169,43 @@ else
 	rm -f "$tmp" 2>/dev/null
 fi
 
+# ---- public address ------------------------------------------------------
+
+# the address the internet sees, from a lookup service. Never fetched on the
+# 5 s poll: cached per link (device, connection, gateway), fetched once on a
+# (re)connect and then every PUBIP_TTL, in the background so the bar never
+# waits on it. A new link shows no row until the first answer is in; a
+# failed lookup (offline, captive portal) is retried after PUBIP_RETRY.
+pubip_cache="${XDG_RUNTIME_DIR:-/tmp}/waybar-network.pubip"
+PUBIP_URL="https://ipv4.icanhazip.com"
+PUBIP_TTL=900
+PUBIP_RETRY=60
+
+g_pubip=""
+public_ip() {
+	local key=$1 ckey="" ct=0 cip="" now_s=${EPOCHSECONDS:-$(date +%s)}
+
+	[ -r "$pubip_cache" ] && { read -r ckey; read -r ct; read -r cip; } < "$pubip_cache"
+	[[ $ct =~ ^[0-9]+$ ]] || ct=0
+	[ "$ckey" = "$key" ] || { cip=""; ct=0; }
+	g_pubip=$cip
+
+	local age=$(( now_s - ct ))
+	[ -n "$cip" ] && [ "$age" -lt "$PUBIP_TTL" ] && return
+	[ -z "$cip" ] && [ "$age" -lt "$PUBIP_RETRY" ] && return
+
+	# stamp the cache first, so the polls while curl runs don't start another
+	printf '%s\n%s\n%s\n' "$key" "$now_s" "$cip" > "$pubip_cache" 2>/dev/null || return
+	(
+		ip=$(curl -fs4 --max-time 5 "$PUBIP_URL" 2>/dev/null)
+		[[ $ip =~ ^[0-9]{1,3}(\.[0-9]{1,3}){3}$ ]] || ip=""
+		# an empty answer is cached too: it holds off the retry for PUBIP_RETRY
+		tmp="$pubip_cache.$BASHPID"
+		printf '%s\n%s\n%s\n' "$key" "$now_s" "$ip" > "$tmp" && mv -f "$tmp" "$pubip_cache"
+	) </dev/null >/dev/null 2>&1 &
+	disown
+}
+
 # ---- bar -----------------------------------------------------------------
 
 if [ ${#devs[@]} -eq 0 ]; then
@@ -181,6 +218,7 @@ if [ ${#devs[@]} -eq 0 ]; then
 fi
 
 describe "${devs[0]}" "${types[0]}"
+public_ip "${devs[0]}|$d_name|$d_gw"
 
 if [ "${types[0]}" = "wifi" ]; then
 	class="wifi"
@@ -253,6 +291,7 @@ fi
 row "Device"   "${devs[0]}"
 rule_row
 row "IPv4"     "$d_addr"
+row "Public"   "$g_pubip"
 row "Gateway"  "$d_gw"
 row "DNS"      "$d_dns"
 if [ -n "${rate_rx[${devs[0]}]:-}" ]; then

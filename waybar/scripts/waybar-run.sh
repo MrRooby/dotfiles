@@ -26,7 +26,7 @@ lib="$root/lib/libfasttooltip.so"
 build() {
 	command -v gcc >/dev/null || return 1
 	command -v pkg-config >/dev/null || return 1
-	pkg-config --exists glib-2.0 || return 1
+	pkg-config --exists gtk+-3.0 || return 1
 
 	mkdir -p "$root/lib" || return 1
 
@@ -34,7 +34,7 @@ build() {
 	# waybar if this is interrupted
 	local tmp="$lib.$$"
 	if gcc -shared -fPIC -O2 -o "$tmp" "$src" \
-		$(pkg-config --cflags glib-2.0) 2>/dev/null; then
+		$(pkg-config --cflags gtk+-3.0) 2>/dev/null; then
 		mv -f "$tmp" "$lib"
 		return 0
 	fi
@@ -48,8 +48,21 @@ fi
 
 # ---- launch --------------------------------------------------------------
 
-if [ -f "$lib" ]; then
-	exec env LD_PRELOAD="${LD_PRELOAD:+$LD_PRELOAD:}$lib" waybar "$@"
+# waybar built from PR #5312 (on-enter/on-leave hooks, used for the
+# Quickshell popups) plus a local patch exporting WAYBAR_OUTPUT_NAME to them.
+# Built in ~/src/waybar-pr5312 and copied here, see the comment in
+# modules/custom/cpu.jsonc. A Fedora library bump can leave it unable to
+# start, so it is only used if --version runs; otherwise the packaged waybar
+# starts and the bar is still there (modules relying on the hooks just lose
+# their popup). Once the PR ships in a release, delete the binary.
+bin=waybar
+pr="$HOME/.local/lib/waybar-pr5312/waybar"   # named waybar so pkill -x waybar finds it
+if [ -x "$pr" ] && "$pr" --version >/dev/null 2>&1; then
+	bin=$pr
 fi
 
-exec waybar "$@"
+if [ -f "$lib" ]; then
+	exec env LD_PRELOAD="${LD_PRELOAD:+$LD_PRELOAD:}$lib" "$bin" "$@"
+fi
+
+exec "$bin" "$@"

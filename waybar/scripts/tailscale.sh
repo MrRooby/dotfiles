@@ -2,6 +2,11 @@
 #
 # Toggle Tailscale and report its state to Waybar
 #
+#   tailscale.sh            -> waybar json
+#   tailscale.sh toggle     -> tailscale up / down
+#   tailscale.sh exit-node  -> stop using the exit node, or go back to the
+#                              last one used (EXIT_NODE if none was saved)
+#
 # Requirements:
 # 	tailscale, with this user set as operator so that up/down needs no sudo:
 # 		sudo tailscale set --operator=$USER
@@ -13,6 +18,13 @@ export LC_ALL=C.utf8
 
 ICON_UP="󰦝"
 ICON_DOWN="󰦞"
+
+EXIT_NODE="pi-faruga"   # used when no previous exit node was saved
+SIGNAL=12               # "signal" in modules/custom/tailscale.jsonc
+
+# the exit node in use when it was switched off, so the next right-click
+# brings back that one rather than always EXIT_NODE
+EXIT_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/waybar/tailscale-exit-node"
 
 # ---- theme colours -------------------------------------------------------
 
@@ -85,6 +97,7 @@ def state:
 	else                      "idle" end;
 
 (.Self | .TailscaleIPs[0] // "", name),
+([.Peer // {} | .[] | select(.ExitNode) | name][0] // ""),
 ([.Peer // {} | .[]] as $p
 	| ($p | map(select(.Online))  | sort_by([(.Active | not), name])),
 	  ($p | map(select(.Online | not)) | sort_by(-seen))
@@ -95,13 +108,14 @@ def state:
 '
 
 tooltip() {
-	local json self_ip self_name
+	local json self_ip self_name exit_name
 	json=$(tailscale status --json 2>/dev/null) || return 1
 
 	local on=() names=() ips=() oses=() states=()
 	{
 		read -r self_ip
 		read -r self_name
+		read -r exit_name
 		while IFS=$'\t' read -r o n i s t; do
 			on+=("$o"); names+=("$n"); ips+=("$i"); oses+=("$s"); states+=("$t")
 		done
@@ -120,8 +134,10 @@ tooltip() {
 	local width=$(( 1 + 2 + nw + 3 + iw + 3 + ow + 3 + sw ))
 
 	local head="Tailscale  ·  $self_name"
-	[ ${#head}    -gt "$width" ] && width=${#head}
-	[ ${#self_ip} -gt "$width" ] && width=${#self_ip}
+	local exit_line="exit node  ·  ${exit_name:-off}"
+	[ ${#head}      -gt "$width" ] && width=${#head}
+	[ ${#self_ip}   -gt "$width" ] && width=${#self_ip}
+	[ ${#exit_line} -gt "$width" ] && width=${#exit_line}
 
 	local rule="" out pad
 	for (( i = 0; i < width; i++ )); do rule+="─"; done
@@ -132,6 +148,13 @@ tooltip() {
 	out="$(printf '%*s' "$pad" '')<b>Tailscale</b>$(paint "$C_DIM" '  ·  ')$(paint "$C_ACCENT" "<b>$g_esc</b>")"
 	pad=$(( (width - ${#self_ip}) / 2 ))
 	out+="\n$(printf '%*s' "$pad" '')$(paint "$C_DIM" "$self_ip")"
+	pad=$(( (width - ${#exit_line}) / 2 ))
+	if [ -n "$exit_name" ]; then
+		escape "$exit_name"
+		out+="\n$(printf '%*s' "$pad" '')$(paint "$C_DIM" 'exit node  ·  ')$(paint "$C_ONLINE" "<b>$g_esc</b>")"
+	else
+		out+="\n$(printf '%*s' "$pad" '')$(paint "$C_DIM" 'exit node  ·  off')"
+	fi
 	out+="\n$rule"
 
 	if [ ${#names[@]} -eq 0 ]; then
@@ -169,14 +192,45 @@ state() {
 		awk -F '"' '/"BackendState"/ {print $4; exit}'
 }
 
-main() {
-	if [[ $1 == "toggle" ]]; then
-		if [[ $(state) == "Running" ]]; then
-			tailscale down
-		else
-			tailscale up
-		fi
+exit_node() {
+	tailscale status --json 2>/dev/null |
+		jq -r '[.Peer // {} | .[] | select(.ExitNode)
+			| (.DNSName | split(".")[0]) // .HostName][0] // empty'
+}
+
+toggle_exit_node() {
+	local cur err
+	cur=$(exit_node)
+	if [ -n "$cur" ]; then
+		mkdir -p "${EXIT_STATE%/*}"
+		printf '%s\n' "$cur" > "$EXIT_STATE"
+		err=$(tailscale set --exit-node= 2>&1 >/dev/null)
+	else
+		cur=$(cat "$EXIT_STATE" 2>/dev/null)
+		cur=${cur:-$EXIT_NODE}
+		err=$(tailscale set --exit-node="$cur" 2>&1 >/dev/null)
 	fi
+	[ -n "$err" ] && notify-send -u critical -i network-vpn \
+		"Tailscale exit node: $cur" "$err" >/dev/null 2>&1
+}
+
+main() {
+	case $1 in
+		toggle)
+			if [[ $(state) == "Running" ]]; then
+				tailscale down
+			else
+				tailscale up
+			fi
+			pkill -RTMIN+$SIGNAL waybar
+			exit 0
+			;;
+		exit-node)
+			toggle_exit_node
+			pkill -RTMIN+$SIGNAL waybar
+			exit 0
+			;;
+	esac
 
 	case $(state) in
 		"Running")

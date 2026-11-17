@@ -85,6 +85,7 @@
 
 /* power profile colors */
 
+@define-color pp-turbo       #B83A8A;
 @define-color pp-performance @dirty-red;
 @define-color pp-balanced    @dirty-orange;
 @define-color pp-saver       @dirty-green;

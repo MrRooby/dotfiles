@@ -52,9 +52,13 @@
 		"format": "",
 		"tooltip": false
 	},
-	// revealed inside the battery power-profile drawer
+	// revealed inside the battery power-profile drawer. it takes the colour of
+	// the first button while that one is active, so the two read as one arrow
 	"custom/left_div#10": {
-		"format": "",
+		"exec": "~/.config/waybar/scripts/power-profile.sh wedge",
+		"return-type": "json",
+		"interval": 10,
+		"signal": 7,
 		"tooltip": false
 	},
 
