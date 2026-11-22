@@ -22,6 +22,14 @@
 		"return-type": "json",
 		"interval": 3,
 		"signal": 9,
+		// The tooltip is a Quickshell popup (~/.config/quickshell/waybar-tooltips,
+		// modules/Bluetooth.qml), opened by on-enter/on-leave. Those hooks come
+		// from waybar PR #5312 (see custom/cpu.jsonc); the packaged waybar ignores
+		// them, so there the module has no tooltip.
+		"tooltip": false,
+		"on-enter": "echo \"enter Bluetooth $WAYBAR_OUTPUT_NAME $WAYBAR_MODULE_X $WAYBAR_MODULE_WIDTH\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+		"on-enter-delay": 250,
+		"on-leave": "echo leave | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
 		"on-click": "~/.config/waybar/scripts/popup.sh bluetui-popup bluetui",
 		"on-click-right": "bluetoothctl power off && notify-send 'Bluetooth Off' -i 'network-bluetooth-inactive' -h string:x-canonical-private-synchronous:bluetooth && pkill -RTMIN+9 waybar",
 		"min-length": 2,

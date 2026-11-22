@@ -4,6 +4,12 @@
     "return-type": "json",
     "exec": "~/.config/waybar/scripts/corne.sh",
     "interval": 60, // Updates every minute to save power
+    // The tooltip is a Quickshell popup (~/.config/quickshell/waybar-tooltips),
+    // opened by on-enter/on-leave from waybar PR #5312 (see custom/cpu.jsonc).
+    "tooltip": false,
+    "on-enter": "echo \"enter Keyboard $WAYBAR_OUTPUT_NAME $WAYBAR_MODULE_X $WAYBAR_MODULE_WIDTH\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+    "on-enter-delay": 250,
+    "on-leave": "echo leave | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
     // key press heatmap; a second click closes it
     "on-click": "~/.config/waybar/scripts/corne-heatmap.py",
     "on-click-right": "XDG_CURRENT_DESKTOP=GNOME gnome-control-center power"

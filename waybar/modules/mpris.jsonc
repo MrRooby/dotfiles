@@ -7,6 +7,14 @@
 		"format-paused": "{status_icon} {title} - {artist}",
 		"tooltip-format": "Playing: {title} - {artist}",
 		"tooltip-format-paused": "Paused: {title} - {artist}",
+		// The tooltip is a Quickshell popup (~/.config/quickshell/waybar-tooltips,
+		// modules/Mpris.qml), opened by on-enter/on-leave from waybar PR #5312
+		// (see custom/cpu.jsonc). The tooltip-format lines above stay for the
+		// packaged waybar, which ignores both hooks.
+		"tooltip": false,
+		"on-enter": "echo \"enter Mpris $WAYBAR_OUTPUT_NAME $WAYBAR_MODULE_X $WAYBAR_MODULE_WIDTH\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+		"on-enter-delay": 250,
+		"on-leave": "echo leave | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
 		// "enable-tooltip-len-limits":
 		// "on-click":
 		// "on-click-middle":

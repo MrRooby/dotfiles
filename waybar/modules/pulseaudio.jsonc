@@ -42,8 +42,16 @@
 		// "on-update":
 		"on-scroll-up": "~/.config/waybar/scripts/volume.sh output raise",
 		"on-scroll-down": "~/.config/waybar/scripts/volume.sh output lower",
-		// "smooth-scrolling-threshold":
-		// "tooltip":
+		// one volume step per notch-sized swipe, not one per touchpad event (a
+		// single swipe sends dozens, and each runs volume.sh + notify-send)
+		"smooth-scrolling-threshold": 1,
+		// The tooltip is the Quickshell "Audio" popup
+		// (~/.config/quickshell/waybar-tooltips), opened by on-enter/on-leave
+		// from waybar PR #5312; the packaged waybar ignores both hooks.
+		"tooltip": false,
+		"on-enter": "echo \"enter Audio $WAYBAR_OUTPUT_NAME $WAYBAR_MODULE_X $WAYBAR_MODULE_WIDTH\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+		"on-enter-delay": 250,
+		"on-leave": "echo leave | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
 		"tooltip-format": "<b>Output Device</b>: {desc}"
 		// "max-volume":
 		// "ignored-sinks":
@@ -80,8 +88,14 @@
 		// "on-update":
 		"on-scroll-up": "~/.config/waybar/scripts/volume.sh input raise",
 		"on-scroll-down": "~/.config/waybar/scripts/volume.sh input lower",
-		// "smooth-scrolling-threshold":
-		// "tooltip":
+		// one volume step per notch-sized swipe, not one per touchpad event (a
+		// single swipe sends dozens, and each runs volume.sh + notify-send)
+		"smooth-scrolling-threshold": 1,
+		// same Quickshell "Audio" popup as the output
+		"tooltip": false,
+		"on-enter": "echo \"enter Audio $WAYBAR_OUTPUT_NAME $WAYBAR_MODULE_X $WAYBAR_MODULE_WIDTH\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+		"on-enter-delay": 250,
+		"on-leave": "echo leave | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
 		"tooltip-format": "<b>Input Device</b>: {desc}"
 		// "max-volume":
 		// "ignored-sinks":

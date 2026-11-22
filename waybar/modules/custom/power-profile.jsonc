@@ -3,34 +3,25 @@
 	    battery level + power profile switcher
 	--------------------------------------------*/
 
-	// hovering the battery percentage slides out the four profile buttons.
+	// The profile buttons live in the battery's Quickshell popup
+	// (modules/Battery.qml), so the bar no longer slides them out: the group
+	// holds just the battery. The custom/pp_* modules below are unused.
 	// turbo is performance with raised CPU power limits (ryzen-limits.service).
-	// this lives in modules-right, which is anchored to the right edge, so
-	// the block can only grow leftwards — the centre island never moves.
-	//
-	// left_div#10 is the powerline wedge that carries the island from the
-	// orange battery back onto the dark button field; it has to be the
-	// first revealed child so the seam stays correct while open.
 	"group/battery_profile": {
 		"orientation": "horizontal",
 		"modules": [
-			"custom/battery",
-			"custom/left_div#10",
-			"custom/pp_turbo",
-			"custom/pp_performance",
-			"custom/pp_balanced",
-			"custom/pp_saver"
+			"custom/battery"
 		],
-		"drawer": {
-			"transition-duration": 300,
-			"transition-left-to-right": true,
-			"children-class": "pp-item"
-		}
+		// the battery's popup (see custom/battery.jsonc)
+		"on-enter": "echo \"enter Battery $WAYBAR_OUTPUT_NAME $WAYBAR_MODULE_X $WAYBAR_MODULE_WIDTH\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+		"on-enter-delay": 250,
+		"on-leave": "echo leave | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock"
 	},
 
 	"custom/pp_turbo": {
 		"exec": "~/.config/waybar/scripts/power-profile.sh get turbo",
 		"return-type": "json",
+		"tooltip": false,  // the battery popup has the profile buttons with their names
 		"interval": 10,
 		"signal": 7,
 		"on-click": "~/.config/waybar/scripts/power-profile.sh set turbo",
@@ -41,6 +32,7 @@
 	"custom/pp_performance": {
 		"exec": "~/.config/waybar/scripts/power-profile.sh get performance",
 		"return-type": "json",
+		"tooltip": false,  // the battery popup has the profile buttons with their names
 		"interval": 10,
 		"signal": 7,
 		"on-click": "~/.config/waybar/scripts/power-profile.sh set performance",
@@ -51,6 +43,7 @@
 	"custom/pp_balanced": {
 		"exec": "~/.config/waybar/scripts/power-profile.sh get balanced",
 		"return-type": "json",
+		"tooltip": false,  // the battery popup has the profile buttons with their names
 		"interval": 10,
 		"signal": 7,
 		"on-click": "~/.config/waybar/scripts/power-profile.sh set balanced",
@@ -61,6 +54,7 @@
 	"custom/pp_saver": {
 		"exec": "~/.config/waybar/scripts/power-profile.sh get power-saver",
 		"return-type": "json",
+		"tooltip": false,  // the battery popup has the profile buttons with their names
 		"interval": 10,
 		"signal": 7,
 		"on-click": "~/.config/waybar/scripts/power-profile.sh set power-saver",

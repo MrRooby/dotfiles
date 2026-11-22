@@ -217,11 +217,12 @@ toggle_exit_node() {
 main() {
 	case $1 in
 		toggle)
-			if [[ $(state) == "Running" ]]; then
-				tailscale down
-			else
-				tailscale up
-			fi
+			local action err
+			if [[ $(state) == "Running" ]]; then action=down; else action=up; fi
+			# tailscale exits 0 even on "Access denied", so judge by stderr
+			err=$(tailscale "$action" 2>&1 >/dev/null)
+			[ -n "$err" ] && notify-send -u critical -i network-vpn \
+				"Tailscale $action failed" "$err" >/dev/null 2>&1
 			pkill -RTMIN+$SIGNAL waybar
 			exit 0
 			;;

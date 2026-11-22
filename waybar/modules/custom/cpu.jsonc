@@ -15,7 +15,8 @@
 		// starts ~/.local/lib/waybar-pr5312/waybar, built from ~/src/waybar-pr5312.
 		// The packaged waybar ignores both hooks, so there the module has no tooltip.
 		"tooltip": false,
-		"on-enter": "echo \"enter custom-cpu $WAYBAR_OUTPUT_NAME\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+		"on-enter": "echo \"enter Cpu $WAYBAR_OUTPUT_NAME $WAYBAR_MODULE_X $WAYBAR_MODULE_WIDTH\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+		"on-enter-delay": 250,
 		"on-leave": "echo leave | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
 		"min-length": 6,
 		"max-length": 6

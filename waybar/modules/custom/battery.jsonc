@@ -15,6 +15,10 @@
 		"exec": "~/.config/waybar/scripts/battery.sh",
 		"return-type": "json",
 		"interval": 5,
+		// The tooltip is a Quickshell popup (~/.config/quickshell/waybar-tooltips,
+		// modules/Battery.qml, with the power profile buttons). Its on-enter /
+		// on-leave sit on group/battery_profile in power-profile.jsonc.
+		"tooltip": false,
 		"min-length": 7,
 		"max-length": 7
 	}

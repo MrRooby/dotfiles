@@ -12,7 +12,14 @@
 		"signal": 13,
 		"min-length": 7,
 		"max-length": 7,
-		"tooltip": true,
+		// The tooltip is a Quickshell popup (~/.config/quickshell/waybar-tooltips,
+		// modules/Brightness.qml) with a slider, opened by on-enter/on-leave from
+		// the waybar PR #5312 build (see custom/cpu.jsonc). It picks the screen
+		// from the bar it opens under, so it needs no per-bar override.
+		"tooltip": false,
+		"on-enter": "echo \"enter Brightness $WAYBAR_OUTPUT_NAME $WAYBAR_MODULE_X $WAYBAR_MODULE_WIDTH\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+		"on-enter-delay": 250,
+		"on-leave": "echo leave | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
 		"on-click": "nwg-displays"  // window placed top-right by the sway for_window rule
 	}
 }

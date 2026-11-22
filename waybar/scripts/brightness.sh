@@ -7,7 +7,15 @@
 # WAYBAR_OUTPUT_NAME to on-scroll commands (only to exec):
 #
 #   internal   laptop panel, through brightnessctl
-#   ddc        external monitor, over DDC/CI through ddcutil
+#   ddc        external monitor through ddcutil: DDC/CI over the video cable
+#              (I2C), or, for monitors that only take commands over their USB
+#              upstream cable (EIZO ColorEdge, ...), the USB Monitor Control
+#              Class. The USB path needs rw access to the monitor's
+#              /dev/usb/hiddev* (see ~/dotfiles/system/udev).
+#
+# A screen that neither path reaches still shows "--" with class
+# "unavailable", and its tooltip says why. `get` always exits 0 for that:
+# waybar hides a custom module whose exec fails.
 #
 # A DDC write takes 100-300 ms, so a fast scroll would queue a pile of ddcutil
 # calls and the monitor would trail behind the wheel. Instead each scroll only
@@ -22,7 +30,8 @@
 #
 # Requirements:
 # 	brightnessctl
-# 	ddcutil (for "ddc"; the user needs rw access to /dev/i2c-*)
+# 	ddcutil (for "ddc"; the user needs rw access to /dev/i2c-*, and to
+# 	         /dev/usb/hiddev* for monitors controlled over USB)
 # 	edid-decode (optional, for make/model/size/year in the tooltip)
 # 	notify-send (libnotify)
 
@@ -274,9 +283,15 @@ internal() {
 
 # ---- ddc -----------------------------------------------------------------
 
-# Every display ddcutil can talk to, cached as "bus connector model" lines.
+# Every display ddcutil can talk to, cached as "id connector model" lines,
+# where id names the link and prefixes its state files in $STATE:
+#   i2c-3     DDC/CI on /dev/i2c-3
+#   usb-1.5   USB bus 1, device 5. ddcutil does not know which connector a
+#             USB monitor is on, so it is matched to the connector whose
+#             (failed) I2C probe reported the same make and model.
+# A monitor reachable both ways is listed with I2C first and that wins.
 # The cache is dropped when the set of connected monitors changes (and with it
-# the per-bus readings, which may now belong to a different monitor).
+# the per-link readings, which may now belong to a different monitor).
 #
 # exec knows its bar's output and only accepts that display; a monitor that
 # just came up may not answer DDC yet, so a miss re-detects, at most every
@@ -284,10 +299,10 @@ internal() {
 # first display.
 RETRY=30
 ddc_detect() {
-	local want=${WAYBAR_OUTPUT_NAME:-} sig b c m
+	local want=${WAYBAR_OUTPUT_NAME:-} sig id c m
 	sig=$(outputs_sig)
 	if [[ $sig != "$(rd "$STATE/outputs")" ]]; then
-		rm -f "$STATE/displays" "$STATE"/i2c-*
+		rm -f "$STATE/displays" "$STATE"/i2c-* "$STATE"/usb-*
 		printf '%s' "$sig" > "$STATE/outputs"
 	elif [[ -e $STATE/displays ]] &&
 		{ [[ -n $want ]] && ! grep -q " $want " "$STATE/displays" || [[ ! -s $STATE/displays ]]; } &&
@@ -296,25 +311,45 @@ ddc_detect() {
 	fi
 	# an empty file is kept too: "nothing answered", retried after RETRY
 	if [[ ! -e $STATE/displays ]]; then
-		ddcutil detect --terse 2> /dev/null | awk '
-			/^Display [0-9]+/ { ok = 1; next }
-			/^Invalid display/ { ok = 0; next }
-			!ok { next }
+		ddcutil detect --terse --enable-usb 2> /dev/null | awk '
+			function flush() {
+				if (mon != "" && conn != "") conn_of[mon] = conn
+				if (ok && bus != "") { n++; ids[n] = "i2c-" bus; conns[n] = conn; mons[n] = mon; models[n] = model }
+				if (ok && usb != "") { n++; ids[n] = "usb-" usb; conns[n] = ""; mons[n] = mon; models[n] = model }
+				ok = 0; bus = ""; usb = ""; conn = ""; mon = ""; model = ""
+			}
+			/^Display [0-9]+/ { flush(); ok = 1; next }
+			/^Invalid display/ { flush(); next }
 			/I2C bus:/ { sub(/.*\/dev\/i2c-/, ""); bus = $0 }
+			/USB bus:device:/ { usb = $NF }
 			/DRM connector:/ { sub(/.*card[0-9]+-/, ""); conn = $0 }
-			/Monitor:/ { split($NF, m, ":"); print bus, conn, m[2]; ok = 0 }
+			# make:model:serial; the key is make:model, as the serial may
+			# read differently (or be empty) over I2C and over USB
+			/Monitor:/ { sub(/.*Monitor: */, ""); full = $0; split(full, f, ":"); mon = f[1] ":" f[2]; model = f[2] }
+			END {
+				flush()
+				for (i = 1; i <= n; i++) {
+					c = conns[i] != "" ? conns[i] : conn_of[mons[i]]
+					if (c == "") continue
+					print ids[i], c, models[i]
+				}
+			}
 		' > "$STATE/displays.tmp"
 		mv "$STATE/displays.tmp" "$STATE/displays"
 	fi
-	BUS="" CONN="" MODEL=""
-	while read -r b c m; do
+	ID="" CONN="" MODEL=""
+	while read -r id c m; do
 		if [[ -z $want || $c == "$want" ]]; then
-			BUS=$b CONN=$c MODEL=$m
+			ID=$id CONN=$c MODEL=$m
 			break
 		fi
 	done < "$STATE/displays"
-	P=$STATE/i2c-$BUS  # per-display state prefix
-	[[ -n $BUS ]]
+	case $ID in
+		i2c-*) DDC=(--bus "${ID#i2c-}") ;;
+		usb-*) DDC=(--enable-usb --usb "${ID#usb-}") ;;
+	esac
+	P=$STATE/$ID  # per-display state prefix
+	[[ -n $ID ]]
 }
 
 forget() { rm -f "$STATE/displays"; }  # unplugged or moved; detect again
@@ -323,7 +358,7 @@ forget() { rm -f "$STATE/displays"; }  # unplugged or moved; detect again
 # Sets target/applied/max/vcp and prints the brightness percent.
 ddc_read() {
 	local out code raw max pct contrast="" preset="" hours=""
-	out=$(ddcutil --bus "$BUS" getvcp 10 12 14 C0 --brief 2> /dev/null)
+	out=$(ddcutil "${DDC[@]}" getvcp 10 12 14 C0 --brief 2> /dev/null)
 	while read -r _ code _ a b; do
 		case $code in
 			10) raw=$a max=$b ;;
@@ -373,7 +408,7 @@ ddc_apply() {
 		while t=$(rd "$P-target"); [[ $t != "$(rd "$P-applied")" ]]; do
 			max=$(rd "$P-max")
 			raw=$(((t * max + 50) / 100))
-			if ddcutil --bus "$BUS" --noverify setvcp 10 "$raw" > /dev/null 2>&1; then
+			if ddcutil "${DDC[@]}" --noverify setvcp 10 "$raw" > /dev/null 2>&1; then
 				echo "$t" > "$P-applied"
 			elif ((++fails >= 3)); then
 				forget
@@ -427,20 +462,26 @@ ddc_tooltip_get() {
 	row "Preset" "$(preset_name "$preset")"
 	row "Usage" "${hours:+$(group "$hours") h}"
 	rule
-	row "Control" "DDC/CI"
-	row "Bus" "i2c-$BUS"
+	if [[ $ID == usb-* ]]; then
+		row "Control" "USB"
+		row "Device" "${ID#usb-}"
+	else
+		row "Control" "DDC/CI"
+		row "Bus" "$ID"
+	fi
 	emit "$pct" "$CONN"
 }
 
 ddc() {
 	local action=$1 step=$2 lk cur new
 	local out=${WAYBAR_OUTPUT_NAME:-external}
+	# get still exits 0 here, so waybar keeps showing the module
 	if ! command -v ddcutil > /dev/null; then
-		[[ $action == get ]] && ddc_unavailable "$out" "ddcutil not installed"
+		[[ $action == get ]] && { ddc_unavailable "$out" "ddcutil not installed"; return 0; }
 		return 1
 	fi
 	if ! ddc_detect; then
-		[[ $action == get ]] && ddc_unavailable "$out" "no DDC/CI"
+		[[ $action == get ]] && { ddc_unavailable "$out" "no DDC/CI or USB"; return 0; }
 		return 1
 	fi
 

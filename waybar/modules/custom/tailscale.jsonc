@@ -7,6 +7,12 @@
         "on-click-right": "~/.config/waybar/scripts/tailscale.sh exit-node",
         "interval": 5,
         "signal": 12,
-        "tooltip": true
+        // The tooltip is a Quickshell popup (~/.config/quickshell/waybar-tooltips,
+        // modules/Tailscale.qml: peers with click-to-copy IPs and MagicDNS names),
+        // opened by on-enter/on-leave from waybar PR #5312; see custom/cpu.jsonc.
+        "tooltip": false,
+        "on-enter": "echo \"enter Tailscale $WAYBAR_OUTPUT_NAME $WAYBAR_MODULE_X $WAYBAR_MODULE_WIDTH\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+        "on-enter-delay": 250,
+        "on-leave": "echo leave | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock"
     }
 }

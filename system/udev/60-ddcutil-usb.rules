@@ -1,0 +1,10 @@
+# Lets the logged-in user drive monitors that take VCP commands over their USB
+# upstream cable (USB Monitor Control Class) through ddcutil, as brightness.sh
+# does. Listed by USB vendor, so only those monitors' HID control interfaces
+# are opened up, not every hiddev device.
+#   056d  EIZO (ColorEdge, FlexScan)
+#
+#   sudo cp 60-ddcutil-usb.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload && sudo udevadm trigger -s usbmisc
+
+SUBSYSTEM=="usbmisc", KERNEL=="hiddev*", ATTRS{idVendor}=="056d", TAG+="uaccess"

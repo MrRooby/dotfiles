@@ -32,6 +32,10 @@
 	color: @dirty-orange;
 	background-color: @backlight;
 }
+/* no DDC/CI or USB link to this screen: "--", greyed out */
+#custom-brightness.unavailable {
+	color: alpha(@dirty-orange, 0.4);
+}
 
 /*-------------
     battery

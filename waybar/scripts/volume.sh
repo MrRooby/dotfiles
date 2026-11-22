@@ -140,7 +140,15 @@ main() {
 			notify-send "$n_name: $state" -i "$icon" \
 				-h string:x-canonical-private-synchronous:volume
 			;;
-		"raise" | "lower") set-volume ;;
+		"raise" | "lower")
+			# one change at a time: scroll events arriving while one runs are
+			# dropped instead of piling up. Hundreds of parallel runs from a
+			# touchpad swipe once exhausted the session bus with notify-send
+			# connections and took the whole session down.
+			exec 9>"${XDG_RUNTIME_DIR:-/tmp}/waybar-volume.lock"
+			flock -n 9 || exit 0
+			set-volume
+			;;
 		*) usage ;;
 	esac
 }

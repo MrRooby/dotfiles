@@ -241,6 +241,11 @@ if has_stage system; then
         run sudo cp "$REPO/system/keyd/default.conf" /etc/keyd/default.conf
         good "/etc/keyd"
     fi
+    if [[ -f "$REPO/system/udev/60-ddcutil-usb.rules" ]]; then
+        run sudo cp "$REPO/system/udev/60-ddcutil-usb.rules" /etc/udev/rules.d/
+        run sudo udevadm control --reload
+        good "/etc/udev/rules.d (ddcutil over USB)"
+    fi
     step "enabling ly and keyd"
     run sudo systemctl enable ly.service    || warn "ly.service — check the unit name"
     run sudo systemctl enable --now keyd    || warn "keyd.service"

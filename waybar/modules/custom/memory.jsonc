@@ -15,6 +15,13 @@
 		"exec": "~/.config/waybar/scripts/memory.sh",
 		"return-type": "json",
 		"interval": 5,
+		// The tooltip is a Quickshell popup (~/.config/quickshell/waybar-tooltips,
+		// modules/Memory.qml), opened by on-enter/on-leave from waybar PR #5312;
+		// the packaged waybar ignores both hooks, so there it has no tooltip.
+		"tooltip": false,
+		"on-enter": "echo \"enter Memory $WAYBAR_OUTPUT_NAME $WAYBAR_MODULE_X $WAYBAR_MODULE_WIDTH\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+		"on-enter-delay": 250,
+		"on-leave": "echo leave | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
 		"min-length": 7,
 		"max-length": 7
 	}

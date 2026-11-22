@@ -17,6 +17,13 @@
 		"interval": 10,
 		"signal": 8,
 		"on-click": "~/.config/waybar/scripts/caffeine.sh toggle",
+		// The tooltip is a Quickshell popup (~/.config/quickshell/waybar-tooltips,
+		// modules/Caffeine.qml) with an on/off switch, opened by on-enter/on-leave
+		// from waybar PR #5312 (see custom/cpu.jsonc).
+		"tooltip": false,
+		"on-enter": "echo \"enter Caffeine $WAYBAR_OUTPUT_NAME $WAYBAR_MODULE_X $WAYBAR_MODULE_WIDTH\" | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
+		"on-enter-delay": 250,
+		"on-leave": "echo leave | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/waybar-tooltips.sock",
 		"min-length": 3,
 		"max-length": 3
 	}
